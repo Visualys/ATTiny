@@ -1,0 +1,7 @@
+
+#!/bin/sh
+avr-gcc -g -Os -mmcu=attiny45 -c $1 -o temp.o
+avr-gcc -g -mmcu=attiny45 -o temp.elf temp.o
+avr-objcopy -j .text -j .data -O ihex temp.elf $2
+rm -f temp.o temp.elf 
+
