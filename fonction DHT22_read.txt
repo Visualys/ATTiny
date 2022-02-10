@@ -1,0 +1,51 @@
+volatile uint8_t DHT22_Hum_i, DHT22_Hum_d, DHT22_Temp_i, DHT22_Temp_d;
+
+int DHT22_read(uint8_t pin) {
+  uint8_t p = (1 << pin);
+  uint8_t data[] = {0,0,0,0,0};
+  uint8_t usec, byte_idx = 0, bit_idx = 0;
+  double t, h;
+  TCCR0A = (1 << WGM01);               // Timer0 in CTC Mode
+  TIMSK &= ~(1 << OCIE0A);             // Disable Compare Match A interrupt
+  DDRB |= p;                           // set pin as output
+  PORTB &= ~p;                         // set pin LOW
+  OCR0A = 255;
+  TCCR0B = 2;                          // Start Timer 0 Prescaler 8
+  TCNT0 = 0;
+  while(TCNT0 < 150);                  // wait 1200 usec
+  DDRB &= ~p;                          // set pin as input
+  PORTB |= p;                          // enable pullup resistor (=set HIGH)
+  while(PINB & p);
+  while((PINB & p)==0);                // DHT Response Low
+  while(PINB & p);                     // DHT Response High
+  TCCR0B = 1;                          // Start Timer 0 Prescaler 1
+  while(byte_idx < 5) {                // Read 40 bits from DHT22
+    while((PINB & p)==0);
+    TCNT0 = 0;
+    while(PINB & p);
+    usec = TCNT0;
+    data[byte_idx] <<= 1;
+    if(usec > 48) data[byte_idx]++;
+    if(bit_idx == 7) {
+        bit_idx = 0;
+        byte_idx++;
+        } else {
+        bit_idx++;
+        }
+    }
+  if(data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF)) {
+    h = .1 *  ((data[0] << 8) | data[1]);
+    DHT22_Hum_i = h;
+    DHT22_Hum_d = (h - DHT22_Hum_i) * 10;
+    t = .1 * (((data[2] & 0x7F) << 8) | data[3]);
+    DHT22_Temp_i = t;
+    DHT22_Temp_d = (t-DHT22_Temp_i) * 10;
+    if(data[2] & 0x80) DHT22_Temp_i *= -1;
+    return 1;
+    } else {
+    DHT22_Hum_i = 0; DHT22_Hum_d = 0;
+    DHT22_Temp_i = 0; DHT22_Temp_d = 0;
+    return 0;
+    }
+  }
+
