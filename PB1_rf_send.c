@@ -1,7 +1,7 @@
 #include <avr/io.h>
 
 uint8_t PB1_rf_send(char* msg) {
-    uint8_t b = 0, i, idx = 0;
+    uint8_t b, idx = 0;
     uint8_t LOWTIME = 32, HIGHTIME = 96;
     DDRB |= (1<<PB1);                      // set PB1 as output
     OCR0A = 128;
@@ -10,7 +10,7 @@ uint8_t PB1_rf_send(char* msg) {
     TCNT0 = 0;                             //set counter to zero
     TCCR0B = (1<<WGM02) | 3;               //start timer0 with 1/64 speed (8MHz-> 1000 bauds)
     // preamble
-    for(i = 0; i < 8; i++) {
+    for(b = 0; b < 8; b++) {
         while((TIFR & (1<<TOV0))==0);      //wait counter 0 overflow
         TIFR |= (1<<TOV0);                 //reset overflow flag
         }
