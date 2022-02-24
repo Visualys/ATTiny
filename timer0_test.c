@@ -1,26 +1,109 @@
-#define F_CPU 1000000UL
 #include <avr/io.h>
 
+uint8_t PB1_rf_send(char* msg) {
+    uint8_t b, idx = 0;
+    uint8_t LOWTIME = 32, HIGHTIME = 96;
+    DDRB |= (1<<PB1);                      // set PB1 as output
+    OCR0A = 128;
+    OCR0B = HIGHTIME; 
+    TCCR0A = (1<<WGM01)|(1<<WGM00)|(1<<COM0B1)|(1<<COM0B0);
+    TCNT0 = 0;                             //set counter to zero
+    TCCR0B = (1<<WGM02) | 3;               //start timer0 with 1/64 speed (8MHz-> 1000 bauds)
+    // preamble
+    for(b = 0; b < 7; b++) {
+        while((TIFR & (1<<TOV0))==0);      //wait counter 0 overflow
+        TIFR |= (1<<TOV0);                 //reset overflow flag
+        }
+    // message
+    while(msg[idx]) {
+        b=128;
+        while(b) {
+            if(msg[idx] & b) {
+                OCR0B = LOWTIME;
+                }else{
+                OCR0B = HIGHTIME;
+                }
+            b >>= 1;
+            while((TIFR & (1<<TOV0))==0);  //wait counter 0 overflow
+            TIFR |= (1<<TOV0);             //reset overflow flag
+            }
+        idx++;
+        }
+    PORTB &= 0b11111101;
+    TCCR0B = 0;                            //stop timer0
+    }
+
+uint8_t PB1_rf_transmit(char* msg) {
+    uint8_t b, idx = 0, bytescount = 4 + (msg[3] & 7);
+    uint8_t LOWTIME = 32, HIGHTIME = 96;
+    TCCR0B = 0;                            //stop timer0
+    DDRB |= (1<<PB1);                      // set PB1 as output
+    OCR0A = 128;
+    OCR0B = HIGHTIME; 
+    TCCR0A = (1<<WGM01)|(1<<WGM00)|(1<<COM0B1)|(1<<COM0B0);
+    TCNT0 = 0;                             //set counter to zero
+    TCCR0B = (1<<WGM02) | 3;               //start timer0 with 1/64 speed (8MHz-> 1000 bauds)
+    // preamble
+    for(b = 0; b < 7; b++) {
+        while((TIFR & (1<<TOV0))==0);      //wait counter 0 overflow
+        TIFR |= (1<<TOV0);                 //reset overflow flag
+        }
+    // message
+    while(idx!=bytescount) {
+        b=128;
+        while(b) {
+            if(msg[idx] & b) {
+                OCR0B = LOWTIME;
+                }else{
+                OCR0B = HIGHTIME;
+                }
+            while(!(TIFR & (1<<TOV0)));  //wait counter 0 overflow
+            TIFR |= (1<<TOV0);             //reset overflow flag
+            b >>= 1;
+            }
+        idx++;
+        }
+    while(!(TIFR & (1<<TOV0)));  //wait counter 0 overflow
+    TIFR |= (1<<TOV0);             //reset overflow flag
+    TCCR0B = 0;                            //stop timer0
+    PORTB &= 0b11111101;
+    }
+
+
+
+void wait_ms(uint32_t msec) {
+    OCR0A = 128;
+    TCCR0A = (1<<WGM01)|(1<<WGM00);
+    TCNT0 = 0;                             //set counter to zero
+    TCCR0B = (1<<WGM02) | 3;               //start timer0 with 1/64 speed
+    while(msec > 0) {
+        while((TIFR & (1<<TOV0))==0);      //wait counter 0 overflow
+        TIFR |= (1<<TOV0);                 //reset overflow flag
+        msec--;
+        }
+    TCCR0B = 0;                            //stop timer0
+    }
 
 int main(void) {
-	DDRB =(1<<PB1)|(1<<PB0); // set PB1 and PB0 as output to enable PWM generation
-	OCR0A = 128;
-	OCR0B = 32;
-	TCCR0A=0x00;  
-	TCCR0A |= (1<<WGM01)|(1<<WGM00)|(1<<COM0B1)|(0<<COM0B0)|(0<<COM0A1)|(0<<COM0A0);
-	TCNT0 = 0; //set counter to zero
-	TCCR0B = (1<<WGM02) | 3; //start timer0 with 1/64 speed
-	while(1){
-		if(TIFR & (1<<TOV0)) {
-			TIFR |= (1<<TOV0); //reset overflow flag
-			if(OCR0B==96) {
-				OCR0B = 32;
-				}else{
-				OCR0B = 96;
-				}
-			}
+/*
+    wait_ms(1000);
+    while(1) {
+        PB1_rf_send("Test Message\r\n"); 
+        wait_ms(1000);
+        }
+*/
+
+    uint8_t msg[11];
+    msg[0]=0xBE;
+    msg[1]=0x01;
+    msg[2]=0x01;
+    msg[3]=0b10001001;
+    msg[4]=3;
+    msg[5]=3;
+    while(1) {
+        PB1_rf_transmit(msg); 
+        wait_ms(1000);
 		}
-	}
+    }
 
-
-// avrdude -p ATtiny45 -c stk500 -P /dev/ttyACM0 -U flash:w:timer0_test.hex:i -U lfuse:w:0xE2:m
+// avrdude -p ATtiny45 -c stk500 -P /dev/ttyACM0 -U flash:w:PB1_rf_send.hex:i -U lfuse:w:0xE2:m
