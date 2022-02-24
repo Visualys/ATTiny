@@ -35,19 +35,22 @@ while(1){
 			BITS++;
 			if(REG_IDX==0) {
 				BITS = 99;
-				if(REG[0]==0xBE) {REG_IDX++; BITS = 0; PORTB ^= 0b00000010;}
+				if(REG[0]==0xBE) {REG_IDX++; BITS = 0;}
+				//if(REG[0]==0xBE) {REG_IDX++; BITS = 0; }
 			}else if(BITS==8) { 
 				REG_IDX++; BITS = 0;
 				}
 			if(BITS==0) {
 				if(REG_IDX==2) {
-					if(REG[1]!=DEVICE_NUM) {REG[0] = 0; REG_IDX = 0; BITS = 0; MAX_IDX = 10;}
+					//if(REG[1]!=1) {REG[0] = 0; REG_IDX = 0; BITS = 0; MAX_IDX = 10; }
+					
 				}else if(REG_IDX==4) { 
 					MAX_IDX = 4 + (REG[3] & 7); 
 					}
 				}
 			}      
 		}
+	if(REG[0]==0xBE) PORTB ^= 0b00000010;
 	}
 }
 
