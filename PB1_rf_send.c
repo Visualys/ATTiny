@@ -95,7 +95,7 @@ int main(void) {
     msg[1]=0x01;
     msg[2]=0x01;
     msg[3]=0b10001001;
-    msg[3]=125;
+    msg[4]=125;
     while(1) {
         PB1_rf_transmit(msg); 
         wait_ms(1000);
