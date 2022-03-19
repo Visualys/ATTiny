@@ -13,7 +13,7 @@ int motor(uint8_t var){
 		wait_ms(50);
 		}
 	PORTB &= ~var;
-	PORTB &= 0b00000001;                           // stop PB0 pull-up
+	PORTB &= 0b11111110;                           // stop PB0 pull-up
 	}
 
 int main(void) {
