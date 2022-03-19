@@ -6,7 +6,7 @@ int motor(uint8_t var){
 	uint8_t count;
 	PORTB |= 0b00000001;                           // PB0 set pull-up
 	PORTB |= var;
-	for(count=0;count<12;count++){
+	for(count=0;count<13;count++){
 		while(!(PINB & 0b00000001)); 
 		wait_ms(50);
 		while((PINB & 0b00000001)); 
