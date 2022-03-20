@@ -17,16 +17,17 @@ int motor(uint8_t var){
 	}
 
 int main(void) {
+	wait_ms(10000); 
     DDRB = 0b00000110;                             // PB1, PB2 as output
-    PORTB = 0b00011000;                            // PB3, PB4 set pull-up resistor
+    //PORTB = 0b00011000;                            // PB3, PB4 set pull-up resistor
     while(1){
-		while((PINB & 0b00011000) == 0b00011000);  // PB3 & PB4 still released
-        if((PINB & (1 << PB3)) == 0){              // is PB3 pushed ?
+		while((PINB & 0b00011000) == 0);  // PB3 & PB4 still released
+        if((PINB & (1 << PB3)) ){              // is PB3 pushed ?
 			while((PINB & (1 << PB3)) == 0);
 			wait_ms(20); 
 			motor(1 << PB1);
 			}
-        if((PINB & (1 << PB4)) == 0){              // is PB4 pushed ?
+        if((PINB & (1 << PB4)) ){              // is PB4 pushed ?
 			while((PINB & (1 << PB4)) == 0);
 			wait_ms(20); 
 			motor(1 << PB2);
