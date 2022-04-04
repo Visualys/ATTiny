@@ -72,18 +72,20 @@ void rf24_reg_write(uint8_t reg, uint8_t value) {
 	rf24_cs(1);
 	}
 
-void rf24_setfrequency(uint8_t f){
-	rf24_reg_write(0x05, f);
-	}
-
-void rf24_setspeedlevel(uint8_t speed, uint8_t level){
-	// speed 0=1Mbps 1=2Mbps 2=250kbps 
-	// level 0=-18dbm 1=-12dbm 2=-6dbm 3=0dbm
-	uint8_t buf=0;
+void rf24_setconfig(uint8_t freq, uint8_t speed, uint8_t level){
+	uint8_t buf = 0;
+	if(speed==0){
+		buf = 0b00100000;                      // 250kpbs
+	}else if(speed==1){
+		buf = 0b00000000;                      // 1Mbps
+	}else{
+		buf = 0b00001000;                      // 2Mbps
+		}
 	buf = ((speed << 3) & 0b00001000);
 	if(speed == 2) buf |= 0b00100000;
 	buf |= ((level < 1) & 0b00000110);
-	rf24_reg_write(6,buf);
+	rf24_reg_write(0x06, buf);                     // RF_SETUP
+	rf24_reg_write(0x05, freq);                    // RF_CH
 	}
 
 void rf24_setautoretransmit(uint8_t delay, uint8_t count){
