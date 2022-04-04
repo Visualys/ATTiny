@@ -81,9 +81,6 @@ void rf24_setconfig(uint8_t freq, uint8_t speed, uint8_t level){
 	}else{
 		buf = 0b00001000;                      // 2Mbps
 		}
-	buf = ((speed << 3) & 0b00001000);
-	if(speed == 2) buf |= 0b00100000;
-	buf |= ((level < 1) & 0b00000110);
 	rf24_reg_write(0x06, buf);                     // RF_SETUP
 	rf24_reg_write(0x05, freq);                    // RF_CH
 	}
@@ -118,7 +115,7 @@ void rf24_setaddress(uint8_t pipe, uint8_t a5, uint8_t a4, uint8_t a3, uint8_t a
 	}
 
 void rf24_set_payload_length(uint8_t length){
-	uint8__t n;
+	uint8_t n;
 	for(n=0;n<6;n++){
 		rf24_reg_write(0x11 + n, length);
 		}
