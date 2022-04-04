@@ -72,7 +72,10 @@ void rf24_reg_write(uint8_t reg, uint8_t value) {
 	rf24_cs(1);
 	}
 
-void rf24_setfrequency(uint8_t f){rf24_reg_write(5,f);}
+void rf24_setfrequency(uint8_t f){
+	rf24_reg_write(0x05, f);
+	}
+
 void rf24_setspeedlevel(uint8_t speed, uint8_t level){
 	// speed 0=1Mbps 1=2Mbps 2=250kbps 
 	// level 0=-18dbm 1=-12dbm 2=-6dbm 3=0dbm
