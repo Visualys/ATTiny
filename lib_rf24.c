@@ -11,7 +11,7 @@ void rf24_mosi(uint8_t level){if(level){PORTA |= rf24_mosi_pin;}else{PORTA &= ~r
 void rf24_clk(uint8_t level){if(level){PORTA |= rf24_clk_pin;}else{PORTA &= ~rf24_clk_pin;}}
 uint8_t rf24_miso(void){return (PINA & rf24_miso_pin)?0xFF:0x00;}
 
-uint8_t rf24_init(uint8_t ce_pin, uint8_t cs_pin, uint8_t mosi_pin, uint8_t miso_pin, uint8_t clk_pin) {
+void rf24_init(uint8_t ce_pin, uint8_t cs_pin, uint8_t mosi_pin, uint8_t miso_pin, uint8_t clk_pin) {
 	rf24_ce_pin = (1 << ce_pin);
 	rf24_cs_pin = (1 << cs_pin);
 	rf24_mosi_pin = (1 << mosi_pin);
@@ -20,9 +20,10 @@ uint8_t rf24_init(uint8_t ce_pin, uint8_t cs_pin, uint8_t mosi_pin, uint8_t miso
 	DDRA |= rf24_ce_pin | rf24_cs_pin | rf24_mosi_pin | rf24_clk_pin;
 	rf24_ce(0);
 	rf24_cs(1);
+	wait_ms(150);
 	}
 
-uint8_t rf24_command(uint8_t cmd) {
+void rf24_command(uint8_t cmd) {
 	uint8_t n=128;
 	rf24_status = 0;
 	while(n){
@@ -35,17 +36,17 @@ uint8_t rf24_command(uint8_t cmd) {
 	}
 
 uint8_t rf24_readbyte(void){
-	uint8_t n=128, rx = 0;
+	uint8_t n=128, v = 0;
 	while(n){
 		rf24_clk(1);
-		rx |= (rf24_miso() & n);
+		v |= (rf24_miso() & n);
 		rf24_clk(0);
 		n >>= 1;
 		}
-	return rx;
+	return v;
 	}
 
-uint8_t rf24_writebyte(uint8_t value){
+void rf24_writebyte(uint8_t value){
 	uint8_t n=128;
 	while(n){
 		rf24_mosi(value & n);
@@ -64,12 +65,11 @@ uint8_t rf24_reg_read(uint8_t reg) {
 	return rx;
 	}
 
-uint8_t rf24_reg_write(uint8_t reg, uint8_t value) {
+void rf24_reg_write(uint8_t reg, uint8_t value) {
 	rf24_cs(0);
 	rf24_command(0x20 | reg);
 	rf24_writebyte(value);
 	rf24_cs(1);
-	return 0;
 	}
 
 void rf24_setfrequency(uint8_t f){rf24_reg_write(5,f);}
@@ -110,6 +110,7 @@ void rf24_setaddress(uint8_t pipe, uint8_t a5, uint8_t a4, uint8_t a3, uint8_t a
 		rf24_writebyte(a5);
 		rf24_cs(1);
 		}
+	}
 
 void rf24_set_payload_length(uint8_t length){
 	uint8__t n;
@@ -130,8 +131,8 @@ void rf24_powerup_rx(){
 	rf24_reg_write(0x07, 0); // Clear Status
 	CONFIG = rf24_reg_read(0x00);
 	rf24_reg_write(0x00, (CONFIG & 0b11111100) | 0b00000011);
-	wait_ms(5);
 	rf24_ce(1);
+	wait_ms(5);
 	}
 	
 void rf24_powerup_tx(){
@@ -139,8 +140,8 @@ void rf24_powerup_tx(){
 	rf24_reg_write(0x07, 0); // Clear Status
 	CONFIG = rf24_reg_read(0x00);
 	rf24_reg_write(0x00, (CONFIG & 0b11111100) | 0b00000010);
-	wait_ms(5);
 	rf24_ce(1);
+	wait_ms(5);
 	}
 
 void rf24_powerdown(){
@@ -211,10 +212,11 @@ void rf24_get_message(char* msg, uint8_t length){
 	}	
 
 void rf24_send_noack(char* msg){
-	//EN_DYN_ACK ?...
-	uint8_t n = 0;
+	uint8_t FEATURE, n = 0;
+	FEATURE = rf24_reg_read(0x1D);
+	rf24_reg_write(0x1D, (FEATURE | 0b00000001)); //EN_DYN_ACK
 	rf24_cs(0);
-	rf24_command(0b10110000);           // W_TX_PAYLOAD_NO_ACK
+	rf24_command(0b10110000);                     // W_TX_PAYLOAD_NO_ACK
 	while(msg[n]){
 		rf24_writebyte(msg[n]);
 		n++;
