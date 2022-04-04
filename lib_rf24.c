@@ -153,14 +153,14 @@ void rf24_powerdown(){
 uint8_t rf24_datasent(){
 	rf24_cs(0);
 	rf24_command(0xFF); // NOP
-	rf24_cs(0);
+	rf24_cs(1);
 	return (rf24_status & 0b00100000);
 	}
 
 uint8_t rf24_maxretry(){
 	rf24_cs(0);
 	rf24_command(0xFF); // NOP
-	rf24_cs(0);
+	rf24_cs(1);
 	return (rf24_status & 0b00010000);
 	}
 
@@ -168,7 +168,7 @@ uint8_t nrf24_dataready() {
 	uint8_t buf = 0;
 	rf24_cs(0);
 	rf24_command(0xFF); // NOP
-	rf24_cs(0);
+	rf24_cs(1);
     if(rf24_status & 0b01000000){  // RX_DR 
 		return 1;
 		}
