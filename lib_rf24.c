@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 volatile uint8_t rf24_ce_pin;
 volatile uint8_t rf24_cs_pin;
 volatile uint8_t rf24_mosi_pin;
@@ -167,7 +169,7 @@ uint8_t rf24_maxretry(){
 	return (rf24_status & 0b00010000);
 	}
 
-uint8_t nrf24_dataready() {
+uint8_t rf24_dataready() {
 	uint8_t buf = 0;
 	rf24_cs(0);
 	rf24_command(0xFF); // NOP
@@ -238,6 +240,6 @@ void rf24_printdetails(){
 	serialcom_send(PB0, s);
 	sprintf(s,"MaxRetry = %x\r\n", rf24_maxretry());
 	serialcom_send(PB0, s);
-	sprintf(s,"DataReady = %x\r\n", nrf24_dataready());
+	sprintf(s,"DataReady = %x\r\n", rf24_dataready());
 	serialcom_send(PB0, s);
 	}
