@@ -217,8 +217,12 @@ void rf24_get_message(char* msg, uint8_t length){
 
 
 void rf24_test_config(){
-	rf24_reg_write(0x01, 0b00000000);                         // EN_AA - Auto Acknowledgement Off
+	rf24_reg_write(0x01, 0b00000000);                         // Disable EN_AA (Auto Acknowledgement) 
+	rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11110011)); // Disable EN_CRC
 	rf24_reg_write(0x1D, (rf24_reg_read(0x1D) | 0b00000101)); // EN_DPL + EN_DYN_ACK
+	rf24_reg_write(0x02, 0b00000001);                         // Enable RX Pipe0
+	rf24_reg_write(0x03, 0b00000011);                         // Address is 5 bytes
+	rf24_reg_write(0x04, 0b00000000);                         // Disable Auto-Retransmit
 	rf24_reg_write(0x1C, 0b00111111);                         // DYN_DP - DPL_P0 to DPL_P5
 	rf24_setaddress(0, 0xBE, 0xBE, 0xBE, 0xBE, 0xBE)
 	rf24_setconfig(40, 0, 0);                                 // Freq=40 250kbps, -18dBm
