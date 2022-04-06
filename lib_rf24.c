@@ -215,10 +215,19 @@ void rf24_get_message(char* msg, uint8_t length){
 	rf24_cs(1);
 	}	
 
+
+void rf24_test_config(){
+	rf24_reg_write(0x01, 0b00000000);                         // EN_AA - Auto Acknowledgement Off
+	rf24_reg_write(0x1D, (rf24_reg_read(0x1D) | 0b00000101)); // EN_DPL + EN_DYN_ACK
+	rf24_reg_write(0x1C, 0b00111111);                         // DYN_DP - DPL_P0 to DPL_P5
+	rf24_setaddress(0, 0xBE, 0xBE, 0xBE, 0xBE, 0xBE)
+	rf24_setconfig(40, 0, 0);                                 // Freq=40 250kbps, -18dBm
+	}
+
 void rf24_send_noack(char* msg){
 	uint8_t FEATURE, n = 0;
 	FEATURE = rf24_reg_read(0x1D);
-	rf24_reg_write(0x1D, (FEATURE | 0b00000001)); //EN_DYN_ACK
+	rf24_reg_write(0x1D, (FEATURE | 0b00000001)); // EN_DYN_ACK
 	rf24_cs(0);
 	rf24_command(0b10110000);                     // W_TX_PAYLOAD_NO_ACK
 	while(msg[n]){
