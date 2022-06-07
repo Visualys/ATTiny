@@ -9,3 +9,13 @@ uint16_t ADC_PB2vs1V1_read() {
   return adc;
   }
 
+uint16_t ADC_PA0-PA1vsVCC_read() {
+	uint16_t adc;
+	ADMUX = 0b00101000;		// read PA1+/PA0- voltage vs VCC ref.
+	ADCSRB = 0;
+	ADCSRA = 0b10000000;         // enable ADC
+	ADCSRA |= 0b01000000;        // start ADC
+	while(ADCSRA & 0b01000000);  // wait measure
+	adc = ADCL; adc |= ADCH << 8;
+	return adc;
+	}
