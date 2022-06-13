@@ -1,9 +1,4 @@
 #include <avr/io.h>
-#include <string.h>
-#include <stdlib.h>
-#include "lib_wait.c"
-#include "lib_serial.c"
-
 
 uint16_t ADC_PA0_PA1vsVCC_read() {
 	uint16_t adc;
