@@ -64,3 +64,4 @@ int main(void) {
 /*
 avrdude -p ATtiny84 -c stk500 -P /dev/ttyACM0 -U flash:w:linky_read.hex:i -U lfuse:w:0xA2:m -U hfuse:w:0xD7:m
 */
+ 
