@@ -62,3 +62,4 @@ uint8_t serial_read(uint8_t RX, char* msg, uint32_t RXbauds) {
     TIFR0 |= (1<<TOV0);                                         // reset overflow flag
     msg[msgID] = 0;
     } 
+ 
