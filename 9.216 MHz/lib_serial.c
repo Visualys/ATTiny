@@ -1,13 +1,13 @@
 void serial_send(uint8_t TX, char* text, uint32_t TXbauds) {	// TX must be on PORTA
 	uint8_t i = 0, pinTX = (1 << TX);
 	uint16_t msg = 0;
-	DDRA |= pinTX;						                            // set pin as output
-	TCCR0B = 0;						                                // stop timer
-  TCCR0A = (1<<WGM01)|(1<<WGM00);				                // set FastPWM mode
-	TCNT0 = 0;						                                // timer val=0
-	if(TXbauds==9600){OCR0A = 119;}                       // 9600
-	if(TXbauds==19200){OCR0A = 59;}                       // 19200
-	if(TXbauds==115200){OCR0A = 9;}                       // 115200
+	DDRA |= pinTX;						// set pin as output
+	TCCR0B = 0;						// stop timer
+  TCCR0A = (1<<WGM01)|(1<<WGM00);				// set FastPWM mode
+	TCNT0 = 0;						// timer val=0
+	if(TXbauds==9600){OCR0A = 119;}                         // 9600
+	if(TXbauds==19200){OCR0A = 59;}                         // 19200
+	if(TXbauds==115200){OCR0A = 9;}                         // 115200
 	PORTA |= pinTX;						                            // set pin HIGH
 	TCCR0B = (1<<WGM02) | 2;				                      // start timer with 1/8 speed
 	while(!(TIFR0 & (1<<TOV0)));				                  // idle time (high)
