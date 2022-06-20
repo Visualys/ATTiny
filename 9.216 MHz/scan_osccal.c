@@ -20,5 +20,11 @@ int main(void) {
 
 
 /*
+with clock output on PB2 :
+--------------------------
 avrdude -p ATtiny84 -c stk500 -P /dev/ttyACM0 -U flash:w:scan_osccal.hex:i -U lfuse:w:0xA2:m -U hfuse:w:0xD7:m
+
+without clock output on PB2 :
+-----------------------------
+avrdude -p ATtiny84 -c stk500 -P /dev/ttyACM0 -U flash:w:scan_osccal.hex:i -U lfuse:w:0xE2:m -U hfuse:w:0xD7:m
 */
