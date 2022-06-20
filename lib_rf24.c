@@ -97,7 +97,7 @@ void rf24_setaddress(uint8_t pipe, uint8_t a5, uint8_t a4, uint8_t a3, uint8_t a
 	rf24_cs(0);
 	rf24_command(0x20 | 0x0A | pipe);
 	rf24_writebyte(a1);
-	if(pipe>1){
+	if(pipe<2){						// fixed !
 		rf24_writebyte(a2);
 		rf24_writebyte(a3);
 		rf24_writebyte(a4);
