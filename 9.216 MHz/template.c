@@ -6,6 +6,7 @@ void main(void) {
     eeprom_update_byte((uint8_t*) 1, 110 );                          // Set the OSCCAL memory address (line to remove when set)
     OSCCAL = eeprom_read_byte((uint8_t*)1) ;                         // read eeprom address 0x01
     ADCSRA &= ~( 1 << ADEN );                                        // set ADC off
+    PRR |= ( 1 << PRADC );                                           // power off ADC
     serial_send(PA0, "ATTiny84 started.\n", 115200);
     }
 
