@@ -16,7 +16,7 @@ void main(void) {
 
     char s[50];
     uint8_t loop;
-  	s[0]=48;
+    s[0]=48;
     s[1]=49;
     s[2]=50;
     s[3]=0;
