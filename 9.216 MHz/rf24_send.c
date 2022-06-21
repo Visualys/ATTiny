@@ -8,7 +8,7 @@
 #define BAUDS 115200
 
 void main(void) {
-    //eeprom_update_byte((uint8_t*) 1, 110 );                          // Set the OSCCAL memory address (line to remove when set)
+    //eeprom_update_byte((uint8_t*) 1, 110 );                        // Set the OSCCAL memory address (line to remove when set)
     OSCCAL = eeprom_read_byte((uint8_t*)1) ;                         // read eeprom address 0x01
     ADCSRA &= ~( 1 << ADEN );                                        // set ADC off
     PRR |= ( 1 << PRADC );                                           // power off ADC
@@ -20,9 +20,9 @@ void main(void) {
     s[1]=49;
     s[2]=50;
     s[3]=0;
-    rf24_init(PA0,PA1,PA2,PA3,PA4);         // ce, cs, mosi, miso, clk
-    rf24_setconfig(2, 0, 0);
-    rf24_setaddress(0, 100,100,100,100,100);
+    rf24_init(PA0,PA1,PA2,PA3,PA4);                        // ce, cs, mosi, miso, clk
+    rf24_setconfig(2, 0, 0);                               // default channel
+    rf24_setaddress(0, 0xe7,0xe7,0xe7,0xe7,0xe7);          // default address
     rf24_setautoretransmit(15,15);
     rf24_set_payload_length(3);
     while(1){
