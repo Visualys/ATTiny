@@ -246,13 +246,13 @@ void rf24_printdetails(){
 	char s[50];
 	for(regid=0;regid<0x1e;regid++){
 		B = rf24_reg_read(regid);
-		sprintf(s,"REG(%x%X) = 0b%i%i%i%i%i%i%i%i\r\n", regid >> 4, regid & 0x0f, B&0x80?1:0, B&0x40?1:0, B&0x20?1:0, B&0x10?1:0, B&0x08?1:0, B&0x04?1:0, B&0x02?1:0, B&0x01?1:0);
-		//serialcom_send(PB0, s);
+	//	sprintf(s,"REG(%x%X) = 0b%i%i%i%i%i%i%i%i\r\n", regid >> 4, regid & 0x0f, B&0x80?1:0, B&0x40?1:0, B&0x20?1:0, B&0x10?1:0, B&0x08?1:0, B&0x04?1:0, B&0x02?1:0, B&0x01?1:0);
+		//serialcom_send(PA6, s,115200);
 		}
 	sprintf(s,"DataSent = %x\r\n", rf24_datasent());
-	//serialcom_send(PB0, s);
+//	serialcom_send(PA6, s,115200);
 	sprintf(s,"MaxRetry = %x\r\n", rf24_maxretry());
-	//serialcom_send(PB0, s);
+//	serialcom_send(PA6, s,115200);
 	sprintf(s,"DataReady = %x\r\n", rf24_dataready());
-	//serialcom_send(PB0, s);
+//	serialcom_send(PA6, s,115200);
 	}
