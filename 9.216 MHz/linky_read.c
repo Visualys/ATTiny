@@ -7,14 +7,14 @@
 
 #define TX PA6
 #define BAUDS 115200
-//                          Linky TTL --> PA5
-
+//                          Linky TTL  --> PA5
+//                          TX (debug) --> PA6
 //********************************
-//event,tic1,000000000,000000000      // HC,HP
-//event,tic2,0000,0                   // W, EC
-//event,ticsent                       // D1 Rule : ticsent
+//event,tic1,000000000,000000000 0  // HC,HP
+//event,tic2,0000,0              0  // W, EC
+//event,ticsent                  0  // D1 Rule (teleinfo sent) : ticsent
 
-char s[32], v[12], sHC[20], sHP[20], PTEC[2];
+char s[32], sHC[24], sHP[24], PTEC[2];
 long HP=0, HC=0, pHP=0, pHC=0, W=0;
 
 void serial_read_linky(uint8_t RX, char* msg) {
@@ -56,13 +56,11 @@ void main(void) {
     ADCSRA &= ~( 1 << ADEN );                                                       // set ADC off
     PRR |= ( 1 << PRADC );                                                          // power off ADC
     serial_send(TX, "ATTiny84 started.\n", BAUDS);
-
     rf24_init(PA0,PA4,PA3,PA2,PA1);                                                 // ce, cs, mosi, miso, clk
     rf24_setconfig(90, 0, 3);
     rf24_setaddress(0, 100,100,100,100,100);
     rf24_setautoretransmit(15,15);
     rf24_set_payload_length(32);
-
     while(1){
         serial_read_linky(PA5, s);
         if(startwith(s,"HCHP")) {
@@ -80,15 +78,15 @@ void main(void) {
                 W=((HC-pHC)+(HP-pHP))*3600/32;
                 if(W){
                     strset(s,"event,HC,");
-		    stradd(s, longtostr(HC));
+                    stradd(s, longtostr(HC));
                     stradd(s,"\n");
                     serial_send(TX, s, BAUDS);
                     strset(s,"event,HP,");
-		    stradd(s, longtostr(HP));
+                    stradd(s, longtostr(HP));
                     stradd(s,"\n");
                     serial_send(TX, s, BAUDS);
                     strset(s,"event,W,");
-		    stradd(s, longtostr(W));
+                    stradd(s, longtostr(W));
                     stradd(s,"\n");
                     serial_send(TX, s, BAUDS);
                     strset(s,"event,EC,");
@@ -117,9 +115,51 @@ void main(void) {
                             serial_send(TX, "Error : max retries !\n", BAUDS);
                             }
                         }
+                    rf24_clear_status();
+                    rf24_powerdown();
+                    // nRF24 .2
+                    strset(s,"event,tic2,");
+                    stradd(s, longtostr(W));
+                    strset(s,",");
+                    if(PTEC[0]==67){							// "C"
+                        stradd(s,"1\n");	
+                        }else{
+                        stradd(s,"0\n");	
+                        }		
+                    rf24_powerup_tx();
+                    rf24_send(s);
+                    loop=1;
+                    while(loop){
+                        if(rf24_datasent()){
+                            loop = 0;
+                            serial_send(TX, "sent to nRF24.\n", BAUDS);
+                            }
+                        if(rf24_maxretry()){
+                            loop = 0;
+                            serial_send(TX, "Error : max retries !\n", BAUDS);
+                            }
+                        }
+                    rf24_clear_status();
+                    rf24_powerdown();
+                    // nRF24 .3
+                    strset(s,"event,ticsent\n                  ");
+                    rf24_powerup_tx();
+                    rf24_send(s);
+                    loop=1;
+                    while(loop){
+                        if(rf24_datasent()){
+                            loop = 0;
+                            serial_send(TX, "sent to nRF24.\n", BAUDS);
+                            }
+                        if(rf24_maxretry()){
+                            loop = 0;
+                            serial_send(TX, "Error : max retries !\n", BAUDS);
+                            }
+                        }
+                    rf24_clear_status();
                     rf24_powerdown();
                     }
-		pHC=HC;pHP=HP;counter=0;
+                pHC=HC;pHP=HP;counter=0;
                 }
             }
         }
