@@ -37,8 +37,8 @@ double puissance10(int p){
     return v;
     }
 
-long strtoint(char*s){
-    long v=0;
+uint32_t strtolong(char*s){
+    uint32_t v=0;
     uint8_t start=0, end=0;
     int i;
     while((s[start]<48 || s[start]>57) && s[start]>0) start++;  
@@ -51,6 +51,29 @@ long strtoint(char*s){
         i--;
         }
     return v;
+    }
+
+void longtostr(uint32_t value, char* s){
+    uint8_t n=0, m=0, c;
+    long temp=value;
+    if(temp<0) {
+        temp *=-1;
+        s[n]=45;
+        n++;m=1;
+        }
+    while(temp) {
+        s[n]=48 + (temp % 10);
+        temp/=10;
+        n++;
+        }
+    s[n]=0; n--;
+    while(m<n) {
+        c=s[m];
+        s[m]=s[n];
+        s[n]=c;
+        m++;
+        n--;
+        }
     }
 
 uint8_t startwith(char* s, char* s2){
