@@ -22,7 +22,7 @@ void rf24_init(uint8_t ce_pin, uint8_t cs_pin, uint8_t mosi_pin, uint8_t miso_pi
 	DDRA |= rf24_ce_pin | rf24_cs_pin | rf24_mosi_pin | rf24_clk_pin;
 	rf24_ce(0);
 	rf24_cs(1);
-	wait_ms(150);
+	wait_ms(200);
 	}
 
 void rf24_command(uint8_t cmd) {
@@ -74,7 +74,7 @@ void rf24_reg_write(uint8_t reg, uint8_t value) {
 	rf24_cs(1);
 	}
 
-void rf24_setconfig(uint8_t freq, uint8_t speed, uint8_t level){
+void rf24_setconfig(uint8_t freq, uint8_t speed, uint8_t power){
 	uint8_t buf = 0;
 	if(speed==0){
 		buf = 0b00100000;                      // 250kpbs
@@ -83,13 +83,14 @@ void rf24_setconfig(uint8_t freq, uint8_t speed, uint8_t level){
 	}else{
 		buf = 0b00001000;                      // 2Mbps
 		}
+	buf |= ((power&3) << 1);
 	rf24_reg_write(0x06, buf);                     // RF_SETUP
 	rf24_reg_write(0x05, freq);                    // RF_CH
 	}
 
 void rf24_setautoretransmit(uint8_t delay, uint8_t count){
 	uint8_t buf=0;
-	buf = (delay << 4) | (count & 0b00001111);
+	buf = (delay << 4) | (count & 0x0F);
 	rf24_reg_write(4,buf);
 	}
 
@@ -116,74 +117,71 @@ void rf24_setaddress(uint8_t pipe, uint8_t a5, uint8_t a4, uint8_t a3, uint8_t a
 		}
 	}
 
-void rf24_set_payload_length(uint8_t length){
+void rf24_set_payload_length(uint8_t l){
 	uint8_t n;
 	for(n=0;n<6;n++){
-		rf24_reg_write(0x11 + n, length);
+		rf24_reg_write(0x11 + n, l);
 		}
 	}
 
 void rf24_clear_status(){
 	rf24_reg_write(0x07, 0b01110000); // STATUS
 	}
+
+void rf24_flush(){
+    rf24_cs(0);
+    rf24_command(0b11100010); // Flush RX
+    rf24_cs(1);
+    rf24_cs(0);
+    rf24_command(0b11100001); // Flush TX
+    rf24_cs(1);
+	}
 	
 void rf24_powerup_rx(){
-	uint8_t CONFIG;
-	rf24_cs(0);
-	rf24_command(0b11100010); //flush RX
-	rf24_cs(1);
-	rf24_reg_write(0x07, 0); // Clear Status
-	CONFIG = rf24_reg_read(0x00);
-	rf24_reg_write(0x00, (CONFIG & 0b11111100) | 0b00000011);
-	rf24_ce(1);
+    rf24_flush();
+    rf24_clear_status();
+    rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11111100) | 0b00000011);
+    rf24_ce(1);
 	wait_ms(5);
 	}
 	
 void rf24_powerup_tx(){
-	uint8_t CONFIG;
-	rf24_reg_write(0x07, 0); // Clear Status
-	CONFIG = rf24_reg_read(0x00);
-	rf24_reg_write(0x00, (CONFIG & 0b11111100) | 0b00000010);
-	rf24_ce(1);
+    rf24_flush();
+    rf24_clear_status();
+    rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11111100) | 0b00000010);
+    rf24_ce(1);
 	wait_ms(5);
 	}
 
 void rf24_powerdown(){
-	uint8_t CONFIG;
-	CONFIG = rf24_reg_read(0x00);
-	rf24_reg_write(0x00, (CONFIG & 0b11111100));
-	rf24_ce(0);
-	}
-		
-uint8_t rf24_datasent(){
-	rf24_cs(0);
-	rf24_command(0xFF); // NOP
-	rf24_cs(1);
-	return (rf24_status & 0b00100000);
+    rf24_reg_write(0x00, rf24_reg_read(0x00) & 0b11111100);
+    rf24_ce(0);
 	}
 
-uint8_t rf24_maxretry(){
+uint8_t rf24_getstatus(){
 	rf24_cs(0);
-	rf24_command(0xFF); // NOP
-	rf24_cs(1);
-	return (rf24_status & 0b00010000);
+    rf24_command(0xFF);
+    rf24_cs(1);
+    return rf24_status;
 	}
 
 uint8_t rf24_dataready() {
-	uint8_t buf = 0;
-	rf24_cs(0);
-	rf24_command(0xFF); // NOP
-	rf24_cs(1);
-    if(rf24_status & 0b01000000){  // RX_DR 
-		return 1;
-		}
-	buf = rf24_reg_read(0x17);     // FIFO_STATUS
-	if(buf & 0b00000001){          // RX_EMPTY
-		return 0;
-	}else{
-		return 1;
+    if(rf24_getstatus() & 0b01000000) return 1;
+    if(rf24_reg_read(0x17) & 1){ 
+        return 0;
+		}else{
+        return 1;
 		}
 	}
+	
+uint8_t rf24_datasent(){
+	return (rf24_getstatus() & 0b00100000);
+	}
+
+uint8_t rf24_maxretry(){
+	return (rf24_getstatus() & 0b00010000);
+	}
+
 
 uint8_t rf24_get_payloadlength() {
     uint8_t buf;
@@ -214,19 +212,6 @@ void rf24_get_message(char* msg, uint8_t length){
 		}
 	rf24_cs(1);
 	}	
-
-
-void rf24_test_config(){
-	rf24_reg_write(0x01, 0b00000000);                         // Disable EN_AA (Auto Acknowledgement) 
-	rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11110011)); // Disable EN_CRC
-	rf24_reg_write(0x1D, (rf24_reg_read(0x1D) | 0b00000101)); // EN_DPL + EN_DYN_ACK
-	rf24_reg_write(0x02, 0b00000001);                         // Enable RX Pipe0
-	rf24_reg_write(0x03, 0b00000011);                         // Address is 5 bytes
-	rf24_reg_write(0x04, 0b00000000);                         // Disable Auto-Retransmit
-	rf24_reg_write(0x1C, 0b00111111);                         // DYN_DP - DPL_P0 to DPL_P5
-	rf24_setaddress(0, 0xBE, 0xBE, 0xBE, 0xBE, 0xBE);
-	rf24_setconfig(40, 0, 0);                                 // Freq=40 250kbps, -18dBm
-	}
 
 void rf24_send_noack(char* msg){
 	uint8_t FEATURE, n = 0;
