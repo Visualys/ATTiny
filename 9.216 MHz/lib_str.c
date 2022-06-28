@@ -17,6 +17,15 @@ void strset(char*s, char*s2){
     s[n]=0;
     }
 
+void stxt(char*s, char*s2, uint8_t position, uint8_t length){
+    uint8_t n = position, nmax = n+length, m = 0;
+    while(n<nmax){
+        s[m]=s2[n];
+        n++;m++;
+        }
+    s[m]=0;
+    }
+
 double puissance10(int p){
     uint8_t i;
     double v=1;
