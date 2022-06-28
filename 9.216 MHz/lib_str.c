@@ -39,8 +39,9 @@ double puissance10(int p){
 
 long strtoint(char*s){
     long v=0;
-    uint8_t start=0, end=0, i;
-    while((s[start]<48 || s[start]>57) && s[start]>0) start++;
+    uint8_t start=0, end=0;
+    int i;
+    while((s[start]<48 || s[start]>57) && s[start]>0) start++;  
     end=start;
     while(s[end]>47 && s[end]<58) end++;
     end--;
