@@ -1,19 +1,21 @@
 #include <avr/io.h>
-#include <stdlib.h>
 #include <avr/eeprom.h>
 #include "lib_serial.c"
 #include "lib_str.c"
 
+//  PA0 <-- Victron TX
+//  PA1 --> D1 RX
+
 char s[32], V[12], I[12], VPV[12], PPV[12], CS[12], IL[12], H19[12], H20[12], H21[12], H22[12], H23[12], HSDS[12];
 
 void output(char* name, char* value){
-	long l=0;
-	char v[10];
+	uint8_t l=0;
+	char v[12];
 	strset(s,"event,");	
 	stradd(s, name);
 	stradd(s,",");	
-	l = strtoint(value);			
-	ltoa(l, v, 10);
+	l = strtolong(value);
+	longtostr(l, v);
 	stradd(s, v);
 	stradd(s,"\n");
 	serial_send(PA1, s, 115200);
