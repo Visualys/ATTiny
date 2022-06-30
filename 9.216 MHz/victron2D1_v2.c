@@ -27,20 +27,20 @@ void main(void) {
 	serial_send(PA1, "ATTiny Started.\n", 115200);
     while(1) {
         serial_read(PA0, s, 19200);
-        if(startwith(s,"V\t")) { strset(V, s);}
-        else if(startwith(s,"I\t")) { strset(I, s);}	
-        else if(startwith(s,"VPV\t")) { strset(VPV, s);
-        }else if(startwith(s,"PPV\t")) { strset(PPV, s);
-        }else if(startwith(s,"CS\t")) { strset(CS, s);
-        }else if(startwith(s,"IL\t")) { strset(IL, s);
-        }else if(startwith(s,"H")) {	
-            if(startwith(s,"H19\t")) { strset(H19, s);
-            }else if(startwith(s,"H20\t")) { strset(H20, s);
-            }else if(startwith(s,"H21\t")) { strset(H21, s);
-            }else if(startwith(s,"H22\t")) { strset(H22, s);
-            }else if(startwith(s,"H23\t")) { strset(H23, s);
-            }else if(startwith(s,"HSDS\t")) { strset(HSDS, s);
-            }
+        if(startwith(s,"V\t")) { stxt(V, s, 2, 10);}
+        else if(startwith(s,"I\t")) { stxt(I,  s,2, 10);}	
+        else if(startwith(s,"VPV\t")) { stxt(VPV, s, 4, 10);}
+        else if(startwith(s,"PPV\t")) { stxt(PPV, s, 4, 10);}
+        else if(startwith(s,"CS\t")) { stxt(CS, s, 3, 10);}
+        else if(startwith(s,"IL\t")) { stxt(IL, s, 3, 10);}
+        else if(startwith(s,"H")) {	
+            if(startwith(s,"H19\t")) { stxt(H19, s, 4, 10);}
+            else if(startwith(s,"H20\t")) { stxt(H20, s, 4, 10);}
+            else if(startwith(s,"H21\t")) { stxt(H21, s, 4, 10);}
+            else if(startwith(s,"H22\t")) { stxt(H22, s, 4, 10);}
+            else if(startwith(s,"H23\t")) { stxt(H23, s, 4, 10);}
+            else if(startwith(s,"HSDS\t")) { stxt(HSDS, s, 5, 10);}
+            
         }else if(startwith(s,"Checksum")) {
             output("V", V);
             output("I", I);
