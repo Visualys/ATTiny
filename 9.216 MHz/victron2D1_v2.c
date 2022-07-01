@@ -9,11 +9,11 @@
 char s[32], V[12], I[12], VPV[12], PPV[12], CS[12], IL[12], H19[12], H20[12], H21[12], H22[12], H23[12], HSDS[12];
 
 void output(char* name, char* value){
-	uint8_t l=0;
+	uint32_t l=0;
 	char v[12];
 	strset(s,"event,");	
 	stradd(s, name);
-	stradd(s,",");	
+	stradd(s,"=");	
 	l = strtolong(value);
 	longtostr(l, v);
 	stradd(s, v);
