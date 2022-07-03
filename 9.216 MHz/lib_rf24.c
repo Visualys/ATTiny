@@ -200,6 +200,11 @@ void rf24_send(char* msg){
 		rf24_writebyte(msg[n]);
 		n++;
 		}
+	while(n<32){
+		rf24_writebyte(32);
+		n++;
+		}
+		
 	rf24_cs(1);
 	}	
 
