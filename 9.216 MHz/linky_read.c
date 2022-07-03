@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/eeprom.h>
 #include <stdlib.h>
 #include "lib_serial.c"
 #include "lib_wait.c"
@@ -14,7 +15,7 @@
 //event,tic2,0000,0              0  // W, EC
 //event,ticsent                  0  // D1 Rule (teleinfo sent) : ticsent
 
-char s[32], sHC[24], sHP[24], PTEC[2];
+char s[50], v[16], sHC[24], sHP[24], PTEC[2];
 long HP=0, HC=0, pHP=0, pHC=0, W=0;
 
 void serial_read_linky(uint8_t RX, char* msg) {
@@ -23,7 +24,7 @@ void serial_read_linky(uint8_t RX, char* msg) {
     TCCR0B = 0;                                                                     // stop timer
     TCCR0A = (1<<WGM01)|(1<<WGM00);                                                 // set FastPWM mode
     TCNT0 = 0;                                                                      // timer val=0
-    OCR0A = 59;
+    OCR0A = 119;
     while ( b != 10 ) {  
         while(!(PINA & pinRX) );
         TCCR0B = 0;                                                                 // stop timer
@@ -72,21 +73,24 @@ void main(void) {
             if(counter==20){
                 stxt(PTEC, s, 6, 1);
                 HC = strtolong(sHC);
-                HP = strtoint(sHP);
+                HP = strtolong(sHP);
                 if(pHC==0) pHC=HC;
                 if(pHP==0) pHP=HP;
                 W=((HC-pHC)+(HP-pHP))*3600/32;
                 if(W){
                     strset(s,"event,HC,");
-                    stradd(s, longtostr(HC));
+                    longtostr(HC, v);
+                    stradd(s, v);
                     stradd(s,"\n");
                     serial_send(TX, s, BAUDS);
                     strset(s,"event,HP,");
-                    stradd(s, longtostr(HP));
+                    longtostr(HP, v);
+                    stradd(s, v);
                     stradd(s,"\n");
                     serial_send(TX, s, BAUDS);
                     strset(s,"event,W,");
-                    stradd(s, longtostr(W));
+                    longtostr(W, v);
+                    stradd(s, v);
                     stradd(s,"\n");
                     serial_send(TX, s, BAUDS);
                     strset(s,"event,EC,");
@@ -96,12 +100,16 @@ void main(void) {
                         stradd(s,"0\n");	
                         }
                     serial_send(TX, s, BAUDS);
+
                     // nRF24
-                    strset(s,"event,tic1,");
-                    stradd(s, longtostr(HC));
-                    strset(s,",");
-                    stradd(s, longtostr(HP));
-                    strset(s,"\n");			
+                    strset(s,"event,tic1=");
+                    longtostr(HC, v);
+                    stradd(s, v);
+                    stradd(s,",");
+                    longtostr(HP, v);
+                    stradd(s, v);
+                    stradd(s,"\n");	
+                    //strset(s,"Bonjour (by nRF24L01+)\n         ");		
                     rf24_powerup_tx();
                     rf24_send(s);
                     loop=1;
@@ -117,10 +125,12 @@ void main(void) {
                         }
                     rf24_clear_status();
                     rf24_powerdown();
+                    wait_ms(150);
                     // nRF24 .2
-                    strset(s,"event,tic2,");
-                    stradd(s, longtostr(W));
-                    strset(s,",");
+                    strset(s,"event,tic2=");
+                    longtostr(W, v);
+                    stradd(s, v);
+                    stradd(s,",");
                     if(PTEC[0]==67){							// "C"
                         stradd(s,"1\n");	
                         }else{
@@ -141,8 +151,9 @@ void main(void) {
                         }
                     rf24_clear_status();
                     rf24_powerdown();
+                    wait_ms(150);
                     // nRF24 .3
-                    strset(s,"event,ticsent\n                  ");
+                    strset(s,"event,ticsent\n");
                     rf24_powerup_tx();
                     rf24_send(s);
                     loop=1;
@@ -158,9 +169,10 @@ void main(void) {
                         }
                     rf24_clear_status();
                     rf24_powerdown();
+                    wait_ms(150);
                     }
-                pHC=HC;pHP=HP;counter=0;
-                }
+               pHC=HC;pHP=HP;counter=0;
+               }
             }
         }
     }
