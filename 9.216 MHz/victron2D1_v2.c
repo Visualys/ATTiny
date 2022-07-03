@@ -64,6 +64,7 @@ void main(void) {
 
 /*
 avrdude -p ATtiny84 -c stk500 -P /dev/ttyACM0 -U flash:w:victron2D1_v2.hex:i -U lfuse:w:0xA2:m -U hfuse:w:0xD7:m
-
-/json.htm?type=command&param=udevice&idx=1711&nvalue=0&svalue='+t+';'+h+';0 HTTP/1.0\r\n\r\n')
 */
+
+
+       /json.htm?type=command&param=udevice&idx=1711&nvalue=0&svalue='+t+';'+h+';0 HTTP/1.0\r\n\r\n')
