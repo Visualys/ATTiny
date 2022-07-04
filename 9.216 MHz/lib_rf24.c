@@ -239,7 +239,7 @@ uint8_t rf24_sendmessage(char* msg){              // Send with 10 tries to ensur
             if(rf24_datasent()){
                 rf24_clear_status();
                 rf24_powerdown();
-                return 1;
+                return tries;
                 }
             if(rf24_maxretry()){
                 tries--;
