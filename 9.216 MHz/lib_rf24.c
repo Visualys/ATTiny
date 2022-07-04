@@ -24,7 +24,7 @@ void rf24_init(uint8_t ce_pin, uint8_t cs_pin, uint8_t mosi_pin, uint8_t miso_pi
     rf24_cs(1);
     wait_ms(200);
     rf24_setconfig(0, 3);
-    rf24_setautoretransmit(8, 8);
+    rf24_setautoretransmit(8, 10);
     rf24_set_payload_length(32);
     }
 
@@ -230,8 +230,8 @@ void rf24_send_noack(char* msg){
     rf24_cs(1);
     }	
 
-uint8_t rf24_sendmessage(char* msg, uint8_t repeats){
-    uint8_t loop = 1, tries = repeats;
+uint8_t rf24_sendmessage(char* msg){              // Send with 10 tries to ensure reception.
+    uint8_t loop = 1, tries = 10;
     while(tries){
         rf24_powerup_tx();
         rf24_send(msg);
@@ -246,6 +246,7 @@ uint8_t rf24_sendmessage(char* msg, uint8_t repeats){
                 loop=0;
                 rf24_clear_status();
                 rf24_powerdown();
+		wait_ms(10);
                 }
             }
         }
