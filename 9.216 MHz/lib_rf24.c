@@ -23,6 +23,9 @@ void rf24_init(uint8_t ce_pin, uint8_t cs_pin, uint8_t mosi_pin, uint8_t miso_pi
 	rf24_ce(0);
 	rf24_cs(1);
 	wait_ms(200);
+	rf24_setconfig(0, 3);
+	rf24_setautoretransmit(8, 8);
+	rf24_set_payload_length(32);
 	}
 
 void rf24_command(uint8_t cmd) {
@@ -204,7 +207,6 @@ void rf24_send(char* msg){
 		rf24_writebyte(32);
 		n++;
 		}
-		
 	rf24_cs(1);
 	}	
 
