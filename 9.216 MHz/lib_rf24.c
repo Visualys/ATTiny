@@ -13,21 +13,6 @@ void rf24_mosi(uint8_t level){if(level){PORTA |= rf24_mosi_pin;}else{PORTA &= ~r
 void rf24_clk(uint8_t level){if(level){PORTA |= rf24_clk_pin;}else{PORTA &= ~rf24_clk_pin;}}
 uint8_t rf24_miso(void){return (PINA & rf24_miso_pin)?0xFF:0x00;}
 
-void rf24_init(uint8_t ce_pin, uint8_t cs_pin, uint8_t mosi_pin, uint8_t miso_pin, uint8_t clk_pin) {
-    rf24_ce_pin = (1 << ce_pin);
-    rf24_cs_pin = (1 << cs_pin);
-    rf24_mosi_pin = (1 << mosi_pin);
-    rf24_miso_pin = (1 << miso_pin);
-    rf24_clk_pin = (1 << clk_pin);
-    DDRA |= rf24_ce_pin | rf24_cs_pin | rf24_mosi_pin | rf24_clk_pin;
-    rf24_ce(0);
-    rf24_cs(1);
-    wait_ms(200);
-    rf24_setconfig(0, 3);
-    rf24_setautoretransmit(8, 10);
-    rf24_set_payload_length(32);
-    }
-
 void rf24_command(uint8_t cmd) {
     uint8_t n=128;
     rf24_status = 0;
@@ -252,3 +237,19 @@ uint8_t rf24_sendmessage(char* msg){              // Send with 10 tries to ensur
         }
     return 0;
     }
+
+void rf24_init(uint8_t ce_pin, uint8_t cs_pin, uint8_t mosi_pin, uint8_t miso_pin, uint8_t clk_pin) {
+    rf24_ce_pin = (1 << ce_pin);
+    rf24_cs_pin = (1 << cs_pin);
+    rf24_mosi_pin = (1 << mosi_pin);
+    rf24_miso_pin = (1 << miso_pin);
+    rf24_clk_pin = (1 << clk_pin);
+    DDRA |= rf24_ce_pin | rf24_cs_pin | rf24_mosi_pin | rf24_clk_pin;
+    rf24_ce(0);
+    rf24_cs(1);
+    wait_ms(200);
+    rf24_setconfig(90, 0, 3);
+    rf24_setautoretransmit(8, 10);
+    rf24_set_payload_length(32);
+    }
+
