@@ -113,7 +113,7 @@ void rf24_set_payload_length(uint8_t l){
     }
 
 void rf24_clear_status(){
-    rf24_reg_write(0x07, 0b01110000); // STATUS
+    rf24_reg_write(0x07, 0b01110000); // Clear STATUS
     }
 
 void rf24_flush(){
@@ -127,7 +127,7 @@ void rf24_flush(){
 	
 void rf24_powerup_rx(){
     rf24_flush();
-    rf24_clear_status();
+    rf24_reg_write(0x07, 0b01110000); // Clear STATUS
     rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11111100) | 0b00000011);
     rf24_ce(1);
     wait_ms(5);
@@ -135,16 +135,16 @@ void rf24_powerup_rx(){
 	
 void rf24_powerup_tx(){
     rf24_flush();
-    rf24_clear_status();
+    rf24_reg_write(0x07, 0b01110000); // Clear STATUS
     rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11111100) | 0b00000010);
     rf24_ce(1);
     wait_ms(5);
     }
 
 void rf24_powerdown(){
-    rf24_flush();
-    rf24_clear_status();
-    rf24_reg_write(0x00, rf24_reg_read(0x00) & 0b11111100);
+    uint8_t CONFIG;
+    CONFIG = rf24_reg_read(0x00);
+    rf24_reg_write(0x00, (CONFIG & 0b11111100));
     rf24_ce(0);
     }
 
@@ -222,14 +222,14 @@ uint8_t rf24_sendmessage(char* msg){              // Send with 10 tries to ensur
         rf24_send(msg);
         while(loop){
             if(rf24_datasent()){
-                rf24_clear_status();
+                rf24_reg_write(0x07, 0b01110000); // Clear STATUS
                 rf24_powerdown();
                 return tries;
                 }
             if(rf24_maxretry()){
                 tries--;
                 loop=0;
-                rf24_clear_status();
+                rf24_reg_write(0x07, 0b01110000); // Clear STATUS
                 rf24_powerdown();
 		wait_ms(10);
                 }
