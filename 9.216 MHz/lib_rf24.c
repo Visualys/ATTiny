@@ -192,6 +192,18 @@ void rf24_send(char* msg){
     rf24_cs(1);
     }	
 
+void rf24_send(char* msg){
+    uint8_t n = 0;
+    rf24_cs(0);
+    rf24_command(0b10100000);           // W_TX_PAYLOAD
+    while(msg[n]){
+        rf24_writebyte(msg[n]);
+        n++;
+        }
+    while(n<32){rf24_writebyte(32); n++; }
+    rf24_cs(1);
+    }	
+
 void rf24_get_message(char* msg, uint8_t length){
     uint8_t n = 0;
     rf24_cs(0);
@@ -199,37 +211,57 @@ void rf24_get_message(char* msg, uint8_t length){
     for(n=0;n<length;n++){
         msg[n]=rf24_readbyte();
         }
+    msg[n]=0;
     rf24_cs(1);
     }	
 
-void rf24_send_noack(char* msg){
-    uint8_t FEATURE, n = 0;
-    FEATURE = rf24_reg_read(0x1D);
-    rf24_reg_write(0x1D, (FEATURE | 0b00000001)); // EN_DYN_ACK
-    rf24_cs(0);
-    rf24_command(0b10110000);                     // W_TX_PAYLOAD_NO_ACK
-    while(msg[n]){
-        rf24_writebyte(msg[n]);
-        n++;
-        }
-    rf24_cs(1);
-    }	
-
-uint8_t rf24_sendmessage(char* msg){              // Send with 10 tries to ensure reception.
-    uint8_t loop = 1, tries = 10;
+uint8_t rf24_sendline(char* msg){                  // Send with 10 tries to ensure reception.
+    uint8_t n, loop = 1, tries = 10;
     while(tries){
         rf24_powerup_tx();
-        rf24_send(msg);
+        rf24_cs(0);
+        rf24_command(0b10100000);                  // W_TX_PAYLOAD
+        n = 0;
+        while(msg[n]!=10){                         // until \n
+            rf24_writebyte(msg[n]);
+            n++;
+            }
+        while(n<32){rf24_writebyte(32); n++; }
+        rf24_cs(1);
         while(loop){
             if(rf24_datasent()){
-                rf24_reg_write(0x07, 0b01110000); // Clear STATUS
+                rf24_reg_write(0x07, 0b01110000);  // Clear STATUS
                 rf24_powerdown();
                 return tries;
                 }
             if(rf24_maxretry()){
                 tries--;
                 loop=0;
-                rf24_reg_write(0x07, 0b01110000); // Clear STATUS
+                rf24_reg_write(0x07, 0b01110000);  // Clear STATUS
+                rf24_powerdown();
+		wait_ms(10);
+                }
+            }
+        }
+    return 0;
+    }
+
+
+uint8_t rf24_sendmessage(char* msg){               // Send with 10 tries to ensure reception.
+    uint8_t loop = 1, tries = 10;
+    while(tries){
+        rf24_powerup_tx();
+        rf24_send(msg);
+        while(loop){
+            if(rf24_datasent()){
+                rf24_reg_write(0x07, 0b01110000);  // Clear STATUS
+                rf24_powerdown();
+                return tries;
+                }
+            if(rf24_maxretry()){
+                tries--;
+                loop=0;
+                rf24_reg_write(0x07, 0b01110000);  // Clear STATUS
                 rf24_powerdown();
 		wait_ms(10);
                 }
@@ -249,7 +281,7 @@ void rf24_init(uint8_t ce_pin, uint8_t cs_pin, uint8_t mosi_pin, uint8_t miso_pi
     rf24_cs(1);
     wait_ms(200);
     rf24_setconfig(90, 0, 3);
-    rf24_setautoretransmit(8, 10);
+    rf24_setautoretransmit(15, 15);
     rf24_set_payload_length(32);
     }
 
