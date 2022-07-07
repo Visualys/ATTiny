@@ -126,26 +126,29 @@ void rf24_flush(){
     }
 	
 void rf24_powerup_rx(){
-    rf24_flush();
     rf24_reg_write(0x07, 0b01110000); // Clear STATUS
+    rf24_flush();
     rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11111100) | 0b00000011);
     rf24_ce(1);
-    wait_ms(5);
+    wait_ms(10);
     }
 	
 void rf24_powerup_tx(){
-    rf24_flush();
     rf24_reg_write(0x07, 0b01110000); // Clear STATUS
+    rf24_flush();
     rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11111100) | 0b00000010);
     rf24_ce(1);
-    wait_ms(5);
+    wait_ms(10);
     }
 
 void rf24_powerdown(){
     uint8_t CONFIG;
+    rf24_reg_write(0x07, 0b01110000);  // Clear STATUS
+    rf24_flush();
     CONFIG = rf24_reg_read(0x00);
     rf24_reg_write(0x00, (CONFIG & 0b11111100));
     rf24_ce(0);
+    wait_ms(10);
     }
 
 uint8_t rf24_getstatus(){
@@ -177,20 +180,6 @@ uint8_t rf24_get_payloadlength() {
     return buf;
     }
 
-void rf24_send(char* msg){
-    uint8_t n = 0;
-    rf24_cs(0);
-    rf24_command(0b10100000);           // W_TX_PAYLOAD
-    while(msg[n]){
-        rf24_writebyte(msg[n]);
-        n++;
-        }
-    while(n<32){
-        rf24_writebyte(32);
-        n++;
-        }
-    rf24_cs(1);
-    }	
 
 void rf24_send(char* msg){
     uint8_t n = 0;
@@ -216,34 +205,28 @@ void rf24_get_message(char* msg, uint8_t length){
     }	
 
 uint8_t rf24_sendline(char* msg){                  // Send with 10 tries to ensure reception.
-    uint8_t n, loop = 1, tries = 10;
-    while(tries){
-        rf24_powerup_tx();
-        rf24_cs(0);
-        rf24_command(0b10100000);                  // W_TX_PAYLOAD
-        n = 0;
-        while(msg[n]!=10){                         // until \n
-            rf24_writebyte(msg[n]);
-            n++;
+    uint8_t n = 0;
+    rf24_powerup_tx();
+    wait_ms(10);
+    rf24_cs(0);
+    rf24_command(0b10100000);                  // W_TX_PAYLOAD
+    while(msg[n]!=10){                         // until \n
+        rf24_writebyte(msg[n]);
+        n++;
+        }
+    rf24_writebyte(10); n++;
+    while(n<32){rf24_writebyte(32); n++; }
+    rf24_cs(1);
+    while(1){
+        if(rf24_datasent()){
+            rf24_powerdown();
+            return 1;
             }
-        while(n<32){rf24_writebyte(32); n++; }
-        rf24_cs(1);
-        while(loop){
-            if(rf24_datasent()){
-                rf24_reg_write(0x07, 0b01110000);  // Clear STATUS
-                rf24_powerdown();
-                return tries;
-                }
-            if(rf24_maxretry()){
-                tries--;
-                loop=0;
-                rf24_reg_write(0x07, 0b01110000);  // Clear STATUS
-                rf24_powerdown();
-		wait_ms(10);
-                }
+        if(rf24_maxretry()){
+            rf24_powerdown();
+            return 0;
             }
         }
-    return 0;
     }
 
 
