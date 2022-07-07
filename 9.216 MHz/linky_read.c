@@ -78,29 +78,6 @@ void main(void) {
                 if(pHP==0) pHP=HP;
                 W=((HC-pHC)+(HP-pHP))*3600/32;
                 if(W){
-                    strset(s,"event,HC,");
-                    longtostr(HC, v);
-                    stradd(s, v);
-                    stradd(s,"\n");
-                    serial_send(TX, s, BAUDS);
-                    strset(s,"event,HP,");
-                    longtostr(HP, v);
-                    stradd(s, v);
-                    stradd(s,"\n");
-                    serial_send(TX, s, BAUDS);
-                    strset(s,"event,W,");
-                    longtostr(W, v);
-                    stradd(s, v);
-                    stradd(s,"\n");
-                    serial_send(TX, s, BAUDS);
-                    strset(s,"event,EC,");
-                    if(PTEC[0]==67){							// "C"
-                        stradd(s,"1\n");	
-                        }else{
-                        stradd(s,"0\n");	
-                        }
-                    serial_send(TX, s, BAUDS);
-
                     // nRF24
                     strset(s,"event,tic1=");
                     longtostr(HC, v);
@@ -109,23 +86,9 @@ void main(void) {
                     longtostr(HP, v);
                     stradd(s, v);
                     stradd(s,"\n");	
-                    //strset(s,"Bonjour (by nRF24L01+)\n         ");		
-                    rf24_powerup_tx();
-                    rf24_send(s);
-                    loop=1;
-                    while(loop){
-                        if(rf24_datasent()){
-                            loop = 0;
-                            serial_send(TX, "sent to nRF24.\n", BAUDS);
-                            }
-                        if(rf24_maxretry()){
-                            loop = 0;
-                            serial_send(TX, "Error : max retries !\n", BAUDS);
-                            }
-                        }
-                    rf24_clear_status();
-                    rf24_powerdown();
-                    wait_ms(150);
+                    rf24_sendline(s);
+                    serial_send(TX, s, BAUDS);
+	                wait_ms(250);
                     // nRF24 .2
                     strset(s,"event,tic2=");
                     longtostr(W, v);
@@ -135,42 +98,10 @@ void main(void) {
                         stradd(s,"1\n");	
                         }else{
                         stradd(s,"0\n");	
-                        }		
-                    rf24_powerup_tx();
-                    rf24_send(s);
-                    loop=1;
-                    while(loop){
-                        if(rf24_datasent()){
-                            loop = 0;
-                            serial_send(TX, "sent to nRF24.\n", BAUDS);
-                            }
-                        if(rf24_maxretry()){
-                            loop = 0;
-                            serial_send(TX, "Error : max retries !\n", BAUDS);
-                            }
                         }
-                    rf24_clear_status();
-                    rf24_powerdown();
-                    wait_ms(150);
-                    // nRF24 .3
-                    strset(s,"event,ticsent\n");
-                    rf24_powerup_tx();
-                    rf24_send(s);
-                    loop=1;
-                    while(loop){
-                        if(rf24_datasent()){
-                            loop = 0;
-                            serial_send(TX, "sent to nRF24.\n", BAUDS);
-                            }
-                        if(rf24_maxretry()){
-                            loop = 0;
-                            serial_send(TX, "Error : max retries !\n", BAUDS);
-                            }
-                        }
-                    rf24_clear_status();
-                    rf24_powerdown();
-                    wait_ms(150);
-                    }
+                    rf24_sendline(s);
+                    serial_send(TX, s, BAUDS);
+					}
                pHC=HC;pHP=HP;counter=0;
                }
             }
