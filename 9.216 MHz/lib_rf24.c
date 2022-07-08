@@ -10,7 +10,7 @@ volatile uint8_t rf24_status;
 void rf24_ce(uint8_t level){if(level){PORTA |= rf24_ce_pin;}else{PORTA &= ~rf24_ce_pin;}}
 void rf24_cs(uint8_t level){if(level){PORTA |= rf24_cs_pin;}else{PORTA &= ~rf24_cs_pin;}}
 void rf24_mosi(uint8_t level){if(level){PORTA |= rf24_mosi_pin;}else{PORTA &= ~rf24_mosi_pin;}}
-void rf24_clk(uint8_t level){if(level){PORTA |= rf24_clk_pin;}else{PORTA &= ~rf24_clk_pin;}}
+void rf24_clk(uint8_t level){if(level){PORTA |= rf24_clk_pin;}else{PORTA &= ~rf24_clk_pin;} ;}
 uint8_t rf24_miso(void){return (PINA & rf24_miso_pin)?0xFF:0x00;}
 
 void rf24_command(uint8_t cmd) {
@@ -128,7 +128,7 @@ void rf24_flush(){
 void rf24_powerup_rx(){
     rf24_reg_write(0x07, 0b01110000); // Clear STATUS
     rf24_flush();
-    rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11111100) | 0b00000011);
+    rf24_reg_write(0x00, ((rf24_reg_read(0x00) & 0b11111100)) | 0b00000011);
     rf24_ce(1);
     wait_ms(10);
     }
@@ -136,7 +136,7 @@ void rf24_powerup_rx(){
 void rf24_powerup_tx(){
     rf24_reg_write(0x07, 0b01110000); // Clear STATUS
     rf24_flush();
-    rf24_reg_write(0x00, (rf24_reg_read(0x00) & 0b11111100) | 0b00000010);
+    rf24_reg_write(0x00, ((rf24_reg_read(0x00) & 0b11111100)) | 0b00000010);
     rf24_ce(1);
     wait_ms(10);
     }
@@ -193,11 +193,11 @@ void rf24_send(char* msg){
     rf24_cs(1);
     }	
 
-void rf24_get_message(char* msg, uint8_t length){
-    uint8_t n = 0;
+void rf24_get_message(char* msg){
+    uint8_t n=0;
     rf24_cs(0);
     rf24_command(0b01100001);           // R_TX_PAYLOAD
-    for(n=0;n<length;n++){
+    for(n=0;n<32;n++){
         msg[n]=rf24_readbyte();
         }
     msg[n]=0;
