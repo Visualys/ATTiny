@@ -2,10 +2,12 @@
 #include <avr/eeprom.h>
 #include "lib_wait.c"
 #include "lib_serial.c"
-#include "lib_rf24_2.c"
+#include "lib_rf24.c"
+#include "lib_str.c"
 
 #define TX PA5
 #define BAUDS 115200
+uint8_t loop;
 
 void main(void) {
     //eeprom_update_byte((uint8_t*) 1, 145 );                        // Set the OSCCAL memory address (line to remove when set)
@@ -14,7 +16,7 @@ void main(void) {
     PRR |= ( 1 << PRADC );                                           // power off ADC
     serial_send(TX, "ATTiny84 started.\n", BAUDS);
 
-    char s[50]="ABC                             ";
+    char s[50]="Bonjour (by nRF24L01+)\n         ";
     uint8_t loop;
     rf24_init(PA0,PA4,PA3,PA2,PA1);                         // ce, cs, mosi, miso, clk
     rf24_setconfig(90, 0, 3);                               // default channel
@@ -22,25 +24,28 @@ void main(void) {
     rf24_setautoretransmit(15,15);
     rf24_set_payload_length(32);
     serial_send(TX, "Settings OK.\n", BAUDS);
-    while(1){
-        rf24_powerup_tx();
-        rf24_send(s);
-        serial_send(TX, "Sending.\n", BAUDS);
-        loop = 1;
-        while(loop){
-           if(rf24_datasent()){
-                loop = 0;
-                serial_send(TX, "Message sent.\n", BAUDS);
-                }
-            if(rf24_maxretry()){
-                loop = 0;
-                serial_send(TX, "Error : Max retries !\r\n", BAUDS);
-                }
-            }
-        rf24_clear_status();
-        rf24_powerdown();
-        wait_ms(1000);
-        }
+
+// SENDER
+//    while(1){
+//		rf24_sendline(s);
+//		serial_send(TX, "sent.\n", BAUDS);
+//		wait_ms(1000);
+//		}
+    
+// RECEVER
+      while(1){
+		loop = 1;
+		rf24_powerup_rx();
+		while(loop){
+			if(rf24_dataready) loop=0;
+			}
+		rf24_get_message(s);
+		rf24_powerdown();
+		if(startwith(s,"event")) {
+		    serial_send(TX, s, BAUDS);	
+		    }
+		} 
+        
     }
 
 
