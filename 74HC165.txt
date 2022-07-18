@@ -1,0 +1,11 @@
+
+                        --------
+          SHIFT/!LOAD -|        |- VCC (2V to 6V)
+                  CLK -|        |- CLOCK INH (Clock Inhibit, when High No change in output)
+                    E -|  74HC  |- D
+                    F -|        |- C
+                    G -|   165  |- B
+                    H -|        |- A
+                  !QH -|        |- SER Serial Input (for cascading)
+                  GND -|        |- QH (Serial Output)
+                        --------
