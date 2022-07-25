@@ -87,4 +87,10 @@ uint8_t BME_init(uint8_t sda, uint8_t scl){
     return v;
     }
 
+/*
+float BME280altitude (float referencePressure) {
+  return ((float)-45846.2)*(pow(((float)BME280pressure()/(float)referencePressure), 0.190263) - (float)1);
+}
+*/
+
 #endif
