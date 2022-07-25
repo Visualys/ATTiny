@@ -16,6 +16,8 @@ I2C READ-WRITE : 0=Write, 1=Read
 
 --------------------------------------------------------------------------------------
 */
+#ifndef lib_i2c
+#define lib_i2c
 
 uint8_t i2c_sda, i2c_scl, i2c_address;
 
@@ -127,14 +129,4 @@ uint8_t i2c_read_reg(uint8_t reg){
     return ret;
     }
 
-
-
-
-
-
-
-
-
-
-
-
+#endif
