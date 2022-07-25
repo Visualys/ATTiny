@@ -20,34 +20,26 @@ void main(void) {
     serial_send(PA0, "ATTiny84 started.\n", 115200);
     
     while(1){
-		v=i2c_init(PB0,PB1,0x76);
-		if(v){
+        v=i2c_init(PB0,PB1,0x76);
+        if(v){
             serial_send(PA0, "BME connected.\n", 115200);
-            
-			dig_t1 = i2c_read_reg(0x88) | (i2c_read_reg(0x89) << 8);
-			dig_t2 = i2c_read_reg(0x8A) | (i2c_read_reg(0x8B) << 8);
-			dig_t3 = i2c_read_reg(0x8C) | (i2c_read_reg(0x8D) << 8);
+            dig_t1 = i2c_read_reg(0x88) | (i2c_read_reg(0x89) << 8);
+            dig_t2 = i2c_read_reg(0x8A) | (i2c_read_reg(0x8B) << 8);
+            dig_t3 = i2c_read_reg(0x8C) | (i2c_read_reg(0x8D) << 8);
             T[1]=dig_t1; T[2]=dig_t2; T[3]=dig_t3;
-            
- 
-			i2c_write_reg(0xF2, 0b00000100);     // 8x sample
-			v = i2c_write_reg(0xF4, 0b10010001);                                   // start measurement                                     
+            i2c_write_reg(0xF2, 0b00000100);     // 8x sample
+            i2c_write_reg(0xF4, 0b10010001);                                   // start measurement                                     
             while(i2c_read_reg(0xF3) & 8);                                         // BME busy
- 
             T[0] = ((i2c_read_reg(0xFA)) << 12) | ((i2c_read_reg(0xFB)) << 4) | ((i2c_read_reg(0xFC)) >> 4);
             var1 = ((T[0] >> 1) - (T[1] << 3)) * T[2];
             var2 = (((T[0] >> 4) - T[1])*((T[0] >> 4) - T[1]) >> 13) * T[3] ;
             T[0] = (var1+var2) / 419430;			
             
-            
-			sprintf(s, "Temperature : %i\n");              
-			serial_send(PA0, s, 115200);
-
-                                                                         
-			
-		}else{
-			serial_send(PA0, "BME not connected.\n", 115200);
-			}
+            sprintf(s, "Temperature : %i\n");              
+            serial_send(PA0, s, 115200);
+        }else{
+            serial_send(PA0, "BME not connected.\n", 115200);
+            }
         wait_ms(1000);	
         }
     }
@@ -56,5 +48,3 @@ void main(void) {
 /*
 avrdude -p ATtiny84 -c stk500 -P /dev/ttyACM0 -U flash:w:i2c_reader.hex:i -U lfuse:w:0xA2:m -U hfuse:w:0xD7:m
 */
-
-
