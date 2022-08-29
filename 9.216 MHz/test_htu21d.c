@@ -35,7 +35,8 @@ void main(void) {
             adc_t = i2c_read16() & 0xFFFC;
             i2c_stop();
             t = ((adc_t * 12500) << 16) - 600;
-
+            sprintf(s, "temp : %i\n", t);
+            serial_send(TX, s, BAUDS);
         }else{
             serial_send(PA0, "HTU21D not connected.\n", 115200);
             }
