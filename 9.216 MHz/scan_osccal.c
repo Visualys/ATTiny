@@ -4,6 +4,11 @@
 #include "lib_wait.c"
 #include "lib_str.c"
 
+/* PA0 --> RX
+   PA1 : ADD ONE TO OSCCAL
+   PA2 : REMOVE ONE TO OSCCAL
+   PA3 : RECORD TO EEPROM
+*/
 
 char s[50];
 uint32_t v=0;
@@ -16,10 +21,11 @@ void main(void) {
     serial_send(PA0, "ATTiny84 started.\n", 115200);
     
     
-    PORTA |=0b00000110;
+    PORTA |=0b00001110;
     while(1){
 		if(!(PINA & 0b00000010)){OSCCAL++;}
 		if(!(PINA & 0b00000100)){OSCCAL--;}
+		if(!(PINA & 0b00001000)){eeprom_update_byte((uint8_t*) 1, OSCCAL );}
 		v=OSCCAL;
 		longtostr(v, s);
 		stradd(s,"\n");
