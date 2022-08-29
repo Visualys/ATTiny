@@ -5,9 +5,7 @@
          
        ___        _        _         __  
   SCL     |_    _| |_    _| |_     _|  |_
-DEVICE ADDRESS : 
-SDO--GND : 1110110 (0x76)
-SDO--VCC : 1110111 (0X77)
+
 I2C READ-WRITE : 0=Write, 1=Read
 --------------------------------------------------------------------------------------
 */
@@ -73,15 +71,46 @@ uint8_t i2c_read(){
         }
     PORTB |= i2c_scl;
     wait_us(1);
-                                              // NOACK
-    PORTB &= ~i2c_scl;
+    PORTB &= ~i2c_scl;                        // NOACK
     wait_us(1);
     DDRB |= i2c_sda;                          // sda as output
     return ret;
-	}
+    }
+
+uint16_t i2c_read16(){    
+    uint8_t c, i, b1, b2, tmp;
+    DDRB &= ~i2c_sda;                         // sda as input
+    PORTB |= i2c_sda;                         // pull-up resistor
+    wait_us(1);
+    for(c=0; c<2; c++){
+        i = 128;
+        tmp = 0;
+        while(i){
+            PORTB |= i2c_scl; wait_us(1);
+            if(PINB & i2c_sda){tmp |=i;}
+            PORTB &= ~i2c_scl; wait_us(1);
+            i >>= 1;
+            }
+        if(c==0){
+            b1 = tmp;
+            DDRB |= i2c_sda;                  // sda as output
+            PORTB &= ~i2c_sda; wait_us(1);    // ACK
+            PORTB |= i2c_scl; wait_us(1);
+            PORTB &= ~i2c_scl; wait_us(1);
+            DDRB &= ~i2c_sda;                 // sda as input
+            PORTB |= i2c_sda;                 // pull-up resistor
+        }else{
+            b2 = tmp;
+            PORTB |= i2c_scl; wait_us(1);     // NOACK
+            PORTB &= ~i2c_scl; wait_us(1);
+            }
+        }
+    DDRB |= i2c_sda;                          // sda as output
+    return (b1 << 8) | b2;
+    }
 
 uint8_t i2c_init(uint8_t sda, uint8_t scl, uint8_t address){
-	uint8_t ret;
+    uint8_t ret;
     i2c_sda = (1 << sda);
     i2c_scl = (1 << scl);
     i2c_address = address;
@@ -95,7 +124,7 @@ uint8_t i2c_init(uint8_t sda, uint8_t scl, uint8_t address){
     }
 
 uint8_t i2c_write_reg(uint8_t reg, uint8_t value){
-	uint8_t ret;
+    uint8_t ret;
     i2c_start();
     ret = i2c_write(i2c_address << 1);
     if(ret==0) return 0;
@@ -108,16 +137,14 @@ uint8_t i2c_write_reg(uint8_t reg, uint8_t value){
     }
 
 uint8_t i2c_read_reg(uint8_t reg){
-	uint8_t ret;
+    uint8_t ret;
     i2c_start();
     ret = i2c_write(i2c_address << 1);
     if(ret==0) return 0;
     ret = i2c_write(reg);
-    if(ret==0) return 0;
-    
+    if(ret==0) return 0.
     i2c_start();
     ret = i2c_write((i2c_address << 1) | 1);
-    
     ret = i2c_read();
     i2c_stop();    
     if(ret==0) return 0;
