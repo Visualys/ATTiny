@@ -1,3 +1,6 @@
+#ifndef lib_wait
+#define lib_wait
+
 void wait_ms(uint32_t msec) {
     OCR0A = 143;
     TCCR0A = (1<<WGM01)|(1<<WGM00);
@@ -23,3 +26,5 @@ void wait_us(uint32_t usec) {
         }
     TCCR0B = 0;                            // stop timer0
     }
+
+#endif
