@@ -123,13 +123,13 @@ uint16_t htu_read3B(){
 uint16_t htu_read_temperature(uint8_t da, uint8_t cl){
     if(htu_init(da, cl)==0) return 0;
     if(htu_command(0xF3)==0) return 0;
-    return =  0.2681274414 * htu_read3B() - 4685;
+    return 0.2681274414 * htu_read3B() - 4685;
     }
 	
 uint16_t htu_read_humidity(uint8_t da, uint8_t cl){
     if(htu_init(da, cl)==0) return 0;
     if(htu_command(0xF5)==0) return 0;
-    return =  0.1907348633 * htu_read3B() - 600;
+    return 0.1907348633 * htu_read3B() - 600;
     }
 
 #endif
