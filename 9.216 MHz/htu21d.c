@@ -7,6 +7,7 @@
 
 char s[32], st[6];
 uint16_t t=0;
+uint8_t status=0;
    
 void main(void) {
     OSCCAL = eeprom_read_byte((uint8_t*)1) ;                         // read eeprom address 0x01
@@ -27,6 +28,14 @@ void main(void) {
 		stradd(s, st);
 		serial_send(PA5, s, 115200);
 		serial_send(PA5, "\n", 115200);	
+		
+		status = htu_status();
+		strset(s, "htu status : ");
+		longtostr(status, st);
+		stradd(s, st);
+		serial_send(PA5, s, 115200);
+		serial_send(PA5, "\n", 115200);	
+		
         wait_ms(1000);	
         }
     }
