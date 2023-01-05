@@ -3,14 +3,14 @@
 
 uint8_t eeprom_read(uint8_t addr){
     while(EECR & (1<<EEPE));
-    EEARL = ucAddress;
+    EEARL = addr;
     EECR |= (1<<EERE);
     return EEDR;
     }
 
 void eeprom_write(uint8_t addr, uint8_t v){
     while(EECR & (1<<EEPE));
-    EECR = (0<<EEPM1)|(0<<EEPM0)
+    EECR = (0<<EEPM1) | (0<<EEPM0);
     EEARL = addr;
     EEDR = v;
     EECR |= (1<<EEMPE);
