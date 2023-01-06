@@ -1,5 +1,5 @@
 #include <avr/io.h>
-#include <avr/eeprom.h>
+#include "lib_eeprom.c"
 #include "lib_serial.c"
 #include "lib_wait.c"
 #include "lib_htu21d_PORTB.c"
@@ -10,7 +10,7 @@ uint16_t t=0;
 uint8_t status=0;
    
 void main(void) {
-    OSCCAL = eeprom_read_byte((uint8_t*)1) ;                         // read eeprom address 0x01
+    OSCCAL = eeprom_read(1) ;                                        // read eeprom address 0x01
     ADCSRA &= ~( 1 << ADEN );                                        // set ADC off
     PRR |= ( 1 << PRADC );                                           // power off ADC
     serial_send(PA5, "ATTiny84 started.\n", 115200);
@@ -29,8 +29,8 @@ void main(void) {
 		serial_send(PA5, s, 115200);
 		serial_send(PA5, "\n", 115200);	
 		
-		status = htu_status();
-		strset(s, "htu status : ");
+		status = htu_lowbatt();
+		strset(s, "htu lowbatt : ");
 		longtostr(status, st);
 		stradd(s, st);
 		serial_send(PA5, s, 115200);
