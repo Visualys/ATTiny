@@ -96,14 +96,14 @@ uint8_t htu_read8(uint8_t ack){
     return ret;
 	}
 
-uint8_t htu_status(){
+uint8_t htu_lowbatt(){
     uint8_t ret;
     if(htu_command(0xE7)==0) return 0;
     htu_start();
     if(htu_write(0x81)==0) return 0;
     ret = htu_read8(0);
     htu_stop();
-    return ret;
+    if(ret & 0x40) {return 1;}else{return 0;}
     }
 
 uint16_t htu_read3B(){
