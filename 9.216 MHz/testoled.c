@@ -4,10 +4,10 @@
 #include "lib_wait.c"
 #include "lib_oled.c"
 #include "lib_str.c"
+#include "lib_htu21d_PORTB.c"
 
 char s[32], st[6];
 uint16_t t=0;
-uint8_t status=0;
 uint8_t k=0;
    
 void main(void) {
@@ -15,64 +15,62 @@ void main(void) {
     ADCSRA &= ~( 1 << ADEN );                                        // set ADC off
     PRR |= ( 1 << PRADC );                                           // power off ADC
     serial_send(PA5, "ATTiny84 started.\n", 115200);
+    wait_ms(150); // oled power up...
+	t=oled_init(PB0, PB1);
     while(1){
-		t=oled_init(PB0, PB1);
-		strset(s, "oled init : ");
-		longtostr(t,st);
-		stradd(s, st);
-		serial_send(PA5, s, 115200);
-		serial_send(PA5, "\n", 115200);	
-		/*
+
+		
 		//t=oled_command(); //display off
 		//t=oled_write(0xAE);
 		//oled_stop();
 	
+		if(k==0) oled_clear(0);
+		k++;
 
-			
-		//k^=0xff;
-		for(uint8_t p=0;p<8;p++){
-			t=oled_command();
-			t=oled_write(0xB0|p);
-			oled_stop();
-			for(uint8_t n=0;n<133;n++){
-				t=oled_ram();
-				t=oled_write(k);
-				oled_stop();
-				}
-			}
-*/
+
 		t=oled_command();
-		t=oled_write(0xB0);
+		t=oled_write(0xB1); //page
 		oled_stop();
 		t=oled_command();
-		t=oled_write(0b00000010);
+		t=oled_write(0b00000010 );
 		oled_stop();		
 		t=oled_command();
 		t=oled_write(0b00010000);
 		oled_stop();		
-		
-		t=oled_ram();
-		t=oled_write(0x00);
-		t=oled_write(0x7C);
-		t=oled_write(0x7E);
-		t=oled_write(0x13);
-		t=oled_write(0x13);
-		t=oled_write(0x7E);
-		t=oled_write(0x7C);
-		t=oled_write(0x00);
+
+		t=htu_read_temperature(PB0, PB1);
+		strset(s, "  Temp : ");
+		longtostr(t,st);
+		st[5]=0;st[4]=st[3];st[3]=st[2];st[2]=46;
+		stradd(s, st);
+		stradd(s,"°C ");
+		oled_print(s,0);
+
+		t=oled_command();
+		t=oled_write(0xB4); //page
+		oled_stop();
+		t=oled_command();
+		t=oled_write(0b00000010 );
+		oled_stop();		
+		t=oled_command();
+		t=oled_write(0b00010000);
+		oled_stop();		
+
+		t=htu_read_humidity(PB0, PB1);
+		strset(s, "   Hum : ");
+		longtostr(t,st);
+		st[5]=0;st[4]=st[3];st[3]=st[2];st[2]=46;
+		stradd(s, st);
+		stradd(s,"%");
+		oled_print(s,0);
 
 
 		
 		t=oled_command(); //display on
 		t=oled_write(0xAF);
 		oled_stop();
-		
-						
-		strset(s, "display : ");
-		longtostr(t,st);
-		stradd(s, st);
-		serial_send(PA5, s, 115200);
-		serial_send(PA5, "\n", 115200);	
+
+
         wait_ms(1000);	
         }
     }
