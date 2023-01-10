@@ -185,9 +185,9 @@ void oled_print(char s[], uint8_t mono){
         else if(c==125){t[0]=65;t[1]=65;t[2]=119;t[3]=62;t[4]=8;t[5]=8;t[6]=0;t[7]=0;}
         else if(c==126){t[0]=2;t[1]=3;t[2]=1;t[3]=3;t[4]=2;t[5]=3;t[6]=1;t[7]=0;}
         else if(c==176){t[0]=0;t[1]=6;t[2]=9;t[3]=9;t[4]=6;t[5]=0;t[6]=0;t[7]=0;}
-        else{t[0]=170;t[1]=85;t[2]=170;t[3]=85;t[4]=170;t[5]=85;t[6]=170;t[7]=0;}
+        else{t[0]=0;t[1]=0;t[2]=0;t[3]=0;t[4]=0;t[5]=0;t[6]=0;t[7]=0;}
         for(j=0;j<8;j++){
-            if(mono) {oled_write(t[j]);}
+            if(mono || c==32) {oled_write(t[j]);}
             else if(t[j]==0 && last==0){} 
             else{oled_write(t[j]); last=t[j];} 
             }
