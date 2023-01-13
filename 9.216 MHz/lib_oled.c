@@ -1,7 +1,6 @@
 #ifndef lib_oled
 #define lib_oled
 
-#include "lib_wait.c"
 
 uint8_t oled_sda, oled_scl;
 
@@ -27,12 +26,9 @@ uint8_t oled_write(uint8_t byte){
         }
     DDRB &= ~oled_sda;
     PORTB |= oled_sda;
-    //wait_us(1);
     PORTB |= oled_scl;
-    //wait_us(1);
     if(PINB & oled_sda){ret=0;}else{ret=1;}
     PORTB &= ~oled_scl;
-    //wait_us(1);
     DDRB |= oled_sda;
     return ret;
     }
@@ -196,4 +192,15 @@ void oled_print(char s[], uint8_t mono){
     oled_stop();
     }
 
+void oled_cmd(uint8_t cmd){
+	oled_command(); 
+	oled_write(cmd);
+	oled_stop();
+    }
+
+void oled_locate(uint8_t x,uint8_t y){
+	oled_cmd(0xB0+(y & 7)); //page
+	oled_cmd(2+(x & 0x0F)); 
+	oled_cmd(0x10 | (x>>4)); 
+	}
 #endif
