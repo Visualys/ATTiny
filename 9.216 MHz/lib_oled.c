@@ -258,4 +258,4 @@ void oled_print2(char s[], uint8_t x, uint8_t y){
         i++;
         }
     oled_stop();   
-    }
+    } 
