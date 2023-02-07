@@ -13,7 +13,7 @@ float f;
 int ent1, dec1, ent2, dec2;
    
 void main(void) {
-    OSCCAL=140;
+    OSCCAL=139;
     ADCSRA &= ~( 1 << ADEN );                                        // set ADC off
     PRR |= ( 1 << PRADC );                                           // power off ADC
     //serial_send(PA5, "ATTiny84 started.\n", 115200);
@@ -48,7 +48,7 @@ void main(void) {
 		oled_print2(s,28,5);
 					
 		if(k==0) {
-			sprintf(s, "event,tt02=%d.%02d,%d.%02d\n", ent1, dec1, ent2, dec2);
+			sprintf(s, "event,tbur=%d.%02d,%d.%02d\n", ent1, dec1, ent2, dec2);
  			rf24_sendline(s);
 			}
 

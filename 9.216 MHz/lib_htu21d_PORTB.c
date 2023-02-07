@@ -96,7 +96,7 @@ uint8_t htu_read8(uint8_t ack){
     return ret;
 	}
 
-uint8_t htu_lowbatt(){
+uint8_t htu_lowbatt(){                        // true if Vcc below 2.34 Volts
     uint8_t ret;
     if(htu_command(0xE7)==0) return 0;
     htu_start();
@@ -120,16 +120,16 @@ uint16_t htu_read3B(){
     return (ret << 8) | (ret2 & 0xFC);
     }
 
-uint16_t htu_read_temperature(uint8_t da, uint8_t cl){
+float htu_read_temperature(uint8_t da, uint8_t cl){
     if(htu_init(da, cl)==0) return 0;
     if(htu_command(0xF3)==0) return 0;
-    return 0.2681274414 * htu_read3B() - 4685;
+    return 0.002681274414f * htu_read3B() - 46.85f;
     }
 	
-uint16_t htu_read_humidity(uint8_t da, uint8_t cl){
+float htu_read_humidity(uint8_t da, uint8_t cl){
     if(htu_init(da, cl)==0) return 0;
     if(htu_command(0xF5)==0) return 0;
-    return 0.1907348633 * htu_read3B() - 600;
+    return 0.001907348633f * htu_read3B() - 6;
     }
 
 #endif

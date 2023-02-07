@@ -3,30 +3,30 @@ void serial_send(uint8_t TX, char* text, uint32_t TXbauds) {	// TX must be on PO
     uint16_t msg = 0;
     DDRA |= pinTX;						// set pin as output
     TCCR0B = 0;						        // stop timer
-    TCCR0A = (1<<WGM01)|(1<<WGM00);				// set FastPWM mode
+    TCCR0A = 0b00000010;                    // CTC Mode
     TCNT0 = 0;						        // timer val=0
     if(TXbauds==9600){OCR0A = 119;}                             // 9600
     else if(TXbauds==19200){OCR0A = 59;}                        // 19200
     else if(TXbauds==115200){OCR0A = 9;}                        // 115200
     PORTA |= pinTX;						// set pin HIGH
-    TCCR0B = (1<<WGM02) | 2;				        // start timer with 1/8 speed
-    while(!(TIFR0 & (1<<TOV0)));				// idle time (high)
-    TIFR0 |= (1<<TOV0);					        // reset overflow flag
+    TCCR0B = TCCR0B = 0b00000010;;				// start timer with 1/8 speed
+    while(!(TIFR0 & 0b00000010));				// idle time (high)
+    TIFR0 = 0b00000111;					        // reset overflow flag
     TCNT0 = 0;
     while(text[i]) {
         msg = 0b1000000000 | (text[i] << 1);
         while(msg) {
-            while(!(TIFR0 & (1<<TOV0)));                        // wait counter 0 overflow
+            while(!(TIFR0 & 0b00000010));                        // wait counter 0 overflow
             if(msg & 1) { PORTA |= pinTX; }else{ PORTA &= ~pinTX; }
-            TIFR0 |= (1<<TOV0);                                 // reset overflow flag
+            TIFR0 = 0b00000111;                                 // reset overflow flag
             msg >>= 1;
             }
         i++;
         }
-    while(!(TIFR0 & (1<<TOV0)));
+    while(!(TIFR0 & 0b00000010));
     TCCR0B = 0;                                                 // stop timer
     TCNT0 = 0;
-    TIFR0 |= (1<<TOV0);                                         // reset overflow flag
+    TIFR0 = 0b00000111;					        // reset overflow flag
     }
 
 uint8_t serial_read(uint8_t RX, char* msg, uint32_t RXbauds) {
@@ -62,4 +62,3 @@ uint8_t serial_read(uint8_t RX, char* msg, uint32_t RXbauds) {
     TIFR0 |= (1<<TOV0);                                         // reset overflow flag
     msg[msgID] = 0;
     } 
- 
