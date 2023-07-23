@@ -1,0 +1,7 @@
+
+#!/bin/sh
+avr-gcc -g -Os -mmcu=attiny84 -c -fdata-sections -ffunction-sections $1 -o temp.o -Wl,--gc-sections
+avr-gcc -g -mmcu=attiny84 -o temp.elf temp.o -Wl,--gc-sections
+avr-objcopy -j .text -j .data -O ihex temp.elf $2
+rm -f temp.o temp.elf 
+

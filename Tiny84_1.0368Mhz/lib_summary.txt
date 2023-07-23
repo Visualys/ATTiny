@@ -1,0 +1,53 @@
+lib_serial :
+void serial_send(uint8_t TX, char* text, uint32_t TXbauds) {	// TX must be on PORTA
+uint8_t serial_read(uint8_t RX, char* msg, uint32_t RXbauds) {
+
+lib_wait :
+void wait_10ms(uint8_t loops) {        //very accurate
+void wait_ms(uint16_t msec) {
+void wait_us(uint16_t usec) {
+
+lib_std :
+void startup(){
+
+lib_i2c :
+uint8_t i2c_init(uint8_t sda, uint8_t scl, uint8_t address){
+uint8_t i2c_write_reg(uint8_t reg, uint8_t value){
+uint8_t i2c_read_reg(uint8_t reg){
+
+lib_htu21d :
+htu_init(uint8_t sda, uint8_t scl)
+htu_read_temperature();
+htu_read_humidity();
+htu_lowbatt()
+
+
+lib_str :
+void stradd(char*s, char*s2){
+void strset(char*s, char*s2){
+void stxt(char*s, char*s2, uint8_t position, uint8_t length){
+double puissance10(int p){
+uint32_t strtolong(char*s){
+void longtostr(uint32_t value, char* s){
+uint8_t startwith(char* s, char* s2){
+
+lib_standby :
+void standby_8s(uint8_t loops) {
+
+lib_rf24 :
+rf24_init(PA0,PA4,PA3,PA2,PA1);                         // ce, cs, mosi, miso, clk
+rf24_setconfig(90, 0, 3);                               // default channel
+rf24_setaddress(0, 100,100,100,100,100);                // default address
+rf24_setautoretransmit(15,15);
+rf24_set_payload_length(32);
+rf24_sendline(s);
+---
+rf24_powerup_rx();loop = 1;
+while(loop){
+    if(rf24_dataready) loop=0;
+    }
+rf24_get_message(s);
+rf24_powerdown();
+
+
+

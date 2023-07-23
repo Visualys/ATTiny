@@ -1,0 +1,2 @@
+avrdude -p ATtiny84 -c stk500 -P /dev/ttyACM0 -U flash:w:%e.hex:i -U lfuse:w:0x22:m -U hfuse:w:0xD7:m
+
