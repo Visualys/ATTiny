@@ -1,11 +1,13 @@
 #include <avr/io.h>
 #include "lib_eeprom.c"
 #include "lib_serial.c"
-#include "lib_wait.c"
+#include "lib/lib_wait.c"
 #include "lib_str.c"
 
 
 // This Program is used to Synchronize CPU to 1.0368 MHz (956ns period)
+// low fuse:22 to output clock on PB2
+// PA5 --> Serial out (9600 bauds)
 
 char s[40];
 uint32_t v=0;
@@ -26,7 +28,7 @@ void main(void) {
 		serial_send(PA5, "OSCCAL = ", 9600);
 		serial_send(PA5, s, 9600);
 		serial_send(PA5, "\n", 9600);
-        wait_10ms(100);	
+        wait_ms(500);	
         }
     }
 
