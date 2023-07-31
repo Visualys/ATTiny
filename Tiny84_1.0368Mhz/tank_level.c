@@ -3,17 +3,14 @@
 #include "lib/lib_wait.c"
 #include "lib_str.c"
 #include "lib_standby.c"
-
 #include "lib_rf24.c"
-
+#include "lib/lib_htu21d.c"
 
 char s[33],s1[8];
-int32_t v=0;
 uint16_t lev;
 
 uint16_t read_level(){                                                          // PWR:PA5  LATCH:PA7  CLOCK:PB2  DATA:PA6
-	uint16_t ret=0, ret2=0;
-    uint16_t n = 32768;
+	uint16_t ret=0, ret2=0, n = 32768;
     DDRA |= (1 << PA5) | (1 << PA7);                                            // PA5 output to Power ON / PA7 output to LATCH
     PORTA |= (1 << PA5);                                                        // Power ON
     DDRB |= (1 << PB2);                                                         // set clock as output
@@ -34,7 +31,6 @@ uint16_t read_level(){                                                          
     return ret2;
     }
 
-
 void main(void) {
 	OSCCAL = eeprom_read(1);                                         // read eeprom address 0x01
     ADCSRA &= ~( 1 << ADEN );                                        // set ADC off
@@ -49,11 +45,10 @@ void main(void) {
 
     while(1){
         //74HC165
-        lev=read_level();
+        lev=read_level();        
         longtostr(lev, s1);
-        strset(s, "event,cude=", 0);
-        strset(s, s1, -1);
-        strset(s, "\n", -1);
+        strset(s, "event,cuve=", 0);
+        strset(s, s1, -1);strset(s, "\n", -1);
         
         // nRF24
         rf24_sendline(s);
