@@ -1,0 +1,4 @@
+MISO     VCC
+SCL      MOSI
+RESET    GND
+
